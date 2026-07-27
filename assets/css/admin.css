@@ -1,0 +1,44 @@
+/* UYOGI staff photo admin — layered on the storefront design system. */
+/* The hidden attribute must beat our display: rules below. */
+[hidden] { display: none !important; }
+.admin { background: var(--paper-2); min-height: 100vh; }
+.admin__bar { display: flex; align-items: center; gap: 14px; padding: 12px 22px; background: var(--ink); color: #fff; }
+.admin__tag { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #b6ac9f; }
+.admin__bar .btn { margin-left: auto; color: #fff; border-color: rgba(255,255,255,.25); }
+.admin__bar .btn:hover { border-color: #fff; }
+
+.admin__login { min-height: 70vh; display: grid; place-items: center; padding: 24px; }
+.admin__card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; width: 100%; max-width: 380px; }
+.admin__card h1 { font-size: 24px; }
+.admin__sub { color: var(--steel); font-size: 14px; margin: 6px 0 18px; }
+.admin__err { color: var(--red); font-size: 13.5px; margin-top: 12px; }
+
+/* Product list */
+.admin__tools { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; padding: 20px 0 16px; }
+.admin__search { flex: 1; min-width: 220px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 11px 14px; font: inherit; }
+.admin__search:focus { outline: none; border-color: var(--ink); }
+.admin__count { font-family: var(--font-mono); font-size: 12px; color: var(--steel); }
+.admin__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 10px; padding-bottom: 60px; }
+.admin__row { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center; text-align: left; background: #fff; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 14px; }
+.admin__row:hover { border-color: var(--ink); }
+.admin__ic { width: 40px; height: 40px; display: grid; place-items: center; background: var(--sun-050); color: var(--sun-deep); border-radius: var(--radius-sm); }
+.admin__ic svg { width: 22px; height: 22px; }
+.admin__meta { display: flex; flex-direction: column; min-width: 0; }
+.admin__meta b { font-family: var(--font-display); font-size: 15px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.admin__meta small { font-family: var(--font-mono); font-size: 11.5px; color: var(--steel); }
+.admin__badge { font-size: 11px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .06em; padding: 4px 8px; border-radius: 6px; white-space: nowrap; }
+.admin__badge.is-need { background: var(--sun-050); color: var(--sun-deep); }
+.admin__badge.is-has { background: var(--stock-bg); color: var(--stock); }
+.admin__empty { color: var(--steel); padding: 30px; }
+
+/* Capture / preview modal */
+.cap { position: fixed; inset: 0; background: rgba(28,26,23,.55); display: grid; place-items: center; z-index: 80; padding: 16px; }
+.cap__panel { background: #fff; border-radius: var(--radius); padding: 22px; width: 100%; max-width: 460px; position: relative; }
+.cap__panel h2 { font-size: 20px; }
+.cap__x { position: absolute; top: 12px; right: 14px; background: none; border: 0; font-size: 18px; color: var(--steel); line-height: 1; }
+.cap__stage { margin: 14px 0; aspect-ratio: 1; background: var(--paper-2); border: 1px solid var(--line); border-radius: var(--radius-sm); display: grid; place-items: center; overflow: hidden; }
+.cap__drop { width: 100%; height: 100%; display: grid; place-items: center; text-align: center; color: var(--steel); cursor: pointer; font-weight: 600; }
+.cap__drop small { color: var(--steel-2); font-weight: 400; }
+.cap__preview { width: 100%; height: 100%; object-fit: contain; }
+.cap__spin { color: var(--steel); font-family: var(--font-mono); font-size: 13px; }
+.cap__actions { display: flex; gap: 12px; justify-content: flex-end; align-items: center; }

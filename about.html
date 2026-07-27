@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>About · UYOGI — Yogi IT Services, Kigali</title>
+  <meta name="description" content="Yogi IT Services (UYOGI) supplies IT equipment, electronics, appliances and household goods across Kigali, Rwanda — one shop, deep stock, citywide delivery.">
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <header class="site-header" id="site-header"></header>
+
+  <main>
+    <section class="about-hero">
+      <div class="wrap">
+        <span class="kicker" style="color:var(--sun)">About Yogi IT Services</span>
+        <h1>One Kigali shop. Deep stock. Fast quotes.</h1>
+        <p>Yogi IT Services (UYOGI) supplies businesses and households across Rwanda with technology and everyday essentials — printers, laptops, toners, networking, CCTV, appliances, furniture and more. One shop, thousands of items behind the counter, and delivery across the city.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="feature-grid">
+          <div class="feature">
+            <div class="feature__n">01</div>
+            <div class="feature__icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v10H4z"/><path d="M4 11h16M9 7V5h6v2"/></svg></div>
+            <h3>One catalog, everything</h3>
+            <p>Over 1,800 products across 28 departments — from office IT to kitchen appliances — so you can source it all in one place.</p>
+          </div>
+          <div class="feature">
+            <div class="feature__n">02</div>
+            <div class="feature__icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v8H3zM14 10h4l3 3v2h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg></div>
+            <h3>Real stock, citywide delivery</h3>
+            <p>We hold deep inventory behind the shop and deliver to your office or home anywhere in Kigali.</p>
+          </div>
+          <div class="feature">
+            <div class="feature__n">03</div>
+            <div class="feature__icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+            <h3>Personal service</h3>
+            <p>Send a quote request and a real person replies with pricing, availability and advice — no bots, no pressure.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--panel">
+      <div class="wrap">
+        <span class="kicker">Find us</span>
+        <h2 style="font-size:28px;margin:10px 0 16px">Visit the shop in Kigali</h2>
+        <div class="loc-chips" id="loc-chips"></div>
+        <p style="color:var(--steel);margin-top:20px" id="contact-line"></p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="cta-band">
+          <div>
+            <h2>Ready to order?</h2>
+            <p>Browse the catalog, build your list, and send us a quote request.</p>
+          </div>
+          <a class="btn btn--ink btn--lg" href="shop.html">Browse products</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/icons.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/cart.js"></script>
+  <script src="assets/js/components.js"></script>
+  <script>
+    UI.initChrome("about");
+    const c = UYOGI_CONFIG.company;
+    document.getElementById("loc-chips").innerHTML =
+      c.locations.map((l) => `<span class="loc-chip">${l}</span>`).join("");
+    const bits = [`Email <a href="mailto:${c.email}" style="color:var(--sun-deep);font-weight:600">${c.email}</a>`];
+    if (c.phone) bits.push(`call <a href="tel:${c.phone.replace(/\s/g,'')}" style="color:var(--sun-deep);font-weight:600">${c.phone}</a>`);
+    document.getElementById("contact-line").innerHTML = "Get in touch: " + bits.join(" · ") + ".";
+  </script>
+</body>
+</html>

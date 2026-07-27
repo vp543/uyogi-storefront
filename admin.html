@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>UYOGI · Product photos (staff)</title>
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body class="admin">
+  <header class="admin__bar">
+    <img class="brand__logo" src="assets/img/uyogi-logo.png" alt="UYOGI" style="height:34px">
+    <span class="admin__tag">Staff · Product photos</span>
+    <button id="signout" class="btn btn--ghost" hidden>Sign out</button>
+  </header>
+
+  <main id="setup" class="admin__login" hidden>
+    <div class="admin__card">
+      <h1>Not set up yet</h1>
+      <p class="admin__sub">The photo backend isn't connected. Follow <b>docs/supabase-setup.md</b> to create the free Supabase project and paste its URL + key into <b>config.js</b>.</p>
+    </div>
+  </main>
+
+  <main id="login" class="admin__login" hidden>
+    <form id="login-form" class="admin__card">
+      <h1>Staff sign in</h1>
+      <p class="admin__sub">Product photo tool. Ask the owner for an account.</p>
+      <div class="field"><label for="e">Email</label><input id="e" type="email" required autocomplete="username"></div>
+      <div class="field"><label for="p">Password</label><input id="p" type="password" required autocomplete="current-password"></div>
+      <button class="btn btn--primary btn--block btn--lg" type="submit">Sign in</button>
+      <p id="login-err" class="admin__err" hidden></p>
+    </form>
+  </main>
+
+  <main id="app" class="wrap" hidden></main>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/icons.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/img-pipeline.js"></script>
+  <script type="module" src="assets/js/admin.js"></script>
+</body>
+</html>

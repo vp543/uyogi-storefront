@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your quote request · UYOGI</title>
+  <meta name="description" content="Review the products you've selected and send a quote request to Yogi IT Services.">
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <header class="site-header" id="site-header"></header>
+
+  <main class="wrap">
+    <div style="padding:30px 0 6px">
+      <span class="eyebrow">Your selection</span>
+      <h1 style="font-size:clamp(26px,3.4vw,36px);font-weight:800;margin-top:8px">Request a quote</h1>
+      <p style="color:var(--steel);margin:8px 0 0">Add anything you need — we'll reply with prices, availability and delivery. No payment is taken online.</p>
+    </div>
+
+    <div id="q-empty" class="empty" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 8h-12z"/><path d="M6 6L5 3H3"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+      <h3>Your quote is empty</h3>
+      <p>Browse the catalog and add the products you're interested in.</p>
+      <a class="btn btn--primary" href="shop.html" style="margin-top:14px">Start browsing</a>
+    </div>
+
+    <div class="quote">
+      <div>
+        <div class="q-items" id="q-items"></div>
+      </div>
+
+      <div id="q-form-wrap">
+        <form class="q-form" id="quote-form" novalidate>
+          <h3>Send your request</h3>
+          <p class="sub">We'll get back to you at the contact details below.</p>
+          <div class="field">
+            <label for="f-name">Full name *</label>
+            <input id="f-name" name="name" type="text" required autocomplete="name" placeholder="e.g. Jean Bosco">
+          </div>
+          <div class="field">
+            <label for="f-phone">Phone / WhatsApp *</label>
+            <input id="f-phone" name="phone" type="tel" required autocomplete="tel" placeholder="e.g. 078 000 0000">
+          </div>
+          <div class="field">
+            <label for="f-email">Email (optional)</label>
+            <input id="f-email" name="email" type="email" autocomplete="email" placeholder="you@example.com">
+          </div>
+          <div class="field">
+            <label for="f-message">Message (optional)</label>
+            <textarea id="f-message" name="message" placeholder="Delivery area, quantities, questions…"></textarea>
+          </div>
+          <button type="submit" class="btn btn--primary btn--block btn--lg" id="q-submit">Send quote request</button>
+          <p class="form-note">By sending, you agree we may contact you about this request.</p>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/icons.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/cart.js"></script>
+  <script src="assets/js/components.js"></script>
+  <script src="assets/js/quote.js"></script>
+</body>
+</html>

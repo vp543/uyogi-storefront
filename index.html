@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UYOGI — Kigali's stockroom for IT, electronics & home | Yogi IT Services</title>
+  <meta name="description" content="Yogi IT Services (UYOGI) stocks over 1,800 IT, electronics and household products in Kigali — printers, laptops, toners, networking, CCTV, appliances and more. Search the catalog and request a quote.">
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <header class="site-header" id="site-header"></header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero__inner">
+        <div class="hero__copy">
+          <span class="kicker">Yogi IT Services · Kigali</span>
+          <h1>Kigali's stockroom for <span class="u-accent">office &amp; home.</span></h1>
+          <p class="hero__lead">Printers, laptops, toners, networking, CCTV, appliances, cookware — thousands of items on the shelves. Find what you need, add it to a quote, and we reply with the price.</p>
+
+          <form class="hero__search search-form" action="shop.html" method="get">
+            <div class="search">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+              <input type="search" name="q" placeholder="Search — try “toner”, “HP”, “fan”…" aria-label="Search products">
+              <button class="btn btn--primary" type="submit">Search</button>
+            </div>
+          </form>
+
+          <div class="hero__facts">
+            <span><b id="stat-products">—</b> products</span>
+            <span class="sep">/</span>
+            <span><b id="stat-instock">—</b> in stock now</span>
+            <span class="sep">/</span>
+            <span><b id="stat-cats">—</b> departments</span>
+            <span class="sep">/</span>
+            <span>one shop, delivery citywide</span>
+          </div>
+        </div>
+
+        <aside class="hero__media">
+          <div class="stockboard" id="stockboard" aria-label="Live stock by department">
+            <div class="stockboard__head">
+              <span class="stockboard__title"><span class="live"></span>Live stock</span>
+              <span class="stockboard__count" id="stockboard-count">—</span>
+            </div>
+            <div id="stockboard-rows"></div>
+            <div class="stockboard__foot">
+              <a href="shop.html">Open the full catalog
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="section__head">
+          <div>
+            <span class="kicker">In stock right now</span>
+            <h2>A sample of what's on the shelves</h2>
+            <p>A spread pulled from across the departments today.</p>
+          </div>
+          <a class="link-more" href="shop.html">See all products
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+        <div class="grid" id="home-featured">
+          <div class="card card--sk sk"></div><div class="card card--sk sk"></div>
+          <div class="card card--sk sk"></div><div class="card card--sk sk"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--panel">
+      <div class="wrap">
+        <div class="section__head">
+          <div>
+            <span class="kicker" id="dept-kicker">Departments</span>
+            <h2>Browse the whole catalog by department</h2>
+          </div>
+          <a class="link-more" href="shop.html">Open the shop
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+        <div class="dept-index" id="dept-index"></div>
+      </div>
+    </section>
+
+    <section class="section section--ink">
+      <div class="wrap">
+        <div class="section__head">
+          <div>
+            <span class="kicker" style="color:var(--sun)">How ordering works</span>
+            <h2>No online payment — just a quick quote</h2>
+            <p>Prices here move with the market and with quantity, so we quote you directly. It's fast.</p>
+          </div>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step__n">01</div>
+            <h3>Find it</h3>
+            <p>Search or browse the departments to find the exact items you need.</p>
+          </div>
+          <div class="step">
+            <div class="step__n">02</div>
+            <h3>Add to a quote</h3>
+            <p>Build a list — no account, no payment, no pressure.</p>
+          </div>
+          <div class="step">
+            <div class="step__n">03</div>
+            <h3>We reply with a price</h3>
+            <p>A real person confirms pricing and availability, usually the same day.</p>
+          </div>
+          <div class="step">
+            <div class="step__n">04</div>
+            <h3>Collect or deliver</h3>
+            <p>Pick up at the shop or we deliver across Kigali.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/icons.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/photos.js"></script>
+  <script src="assets/js/cart.js"></script>
+  <script src="assets/js/components.js"></script>
+  <script src="assets/js/home.js"></script>
+</body>
+</html>

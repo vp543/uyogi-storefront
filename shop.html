@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shop all products · UYOGI</title>
+  <meta name="description" content="Browse the full Yogi IT Services catalog — printers, laptops, toners, appliances, CCTV and more. Filter by category, search and request a quote.">
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <header class="site-header" id="site-header"></header>
+
+  <main class="wrap">
+    <div class="shop">
+      <aside class="shop__filters" id="filters">
+        <div class="filter-group">
+          <h4>Category</h4>
+          <div class="filter-list" id="cat-list"></div>
+        </div>
+        <div class="filter-group">
+          <h4>Availability</h4>
+          <label class="chk"><input type="checkbox" id="stock-only"> In stock only</label>
+        </div>
+      </aside>
+
+      <section class="shop__main">
+        <form id="shop-search-form" class="hero__search" style="margin:0 0 18px;max-width:none">
+          <div class="search" style="max-width:none">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+            <input type="search" id="shop-search-input" placeholder="Search products, brands or codes…" aria-label="Search products">
+          </div>
+        </form>
+
+        <div class="shop__bar">
+          <div>
+            <span class="shop__title" id="shop-title">All products</span>
+            <span class="shop__count" id="shop-count"></span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <button class="btn btn--ghost filter-toggle" id="filter-toggle">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+              Filters
+            </button>
+            <select class="select" id="sort" aria-label="Sort products">
+              <option value="relevance">Sort: In stock first</option>
+              <option value="name-asc">Name A–Z</option>
+              <option value="name-desc">Name Z–A</option>
+              <option value="stock">Most in stock</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="active-filters" id="active-filters" style="display:none"></div>
+        <div class="grid" id="shop-grid"></div>
+        <nav class="pager" id="pager" aria-label="Pagination"></nav>
+      </section>
+    </div>
+  </main>
+
+  <div class="filter-backdrop" id="filter-backdrop"></div>
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/icons.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/photos.js"></script>
+  <script src="assets/js/cart.js"></script>
+  <script src="assets/js/components.js"></script>
+  <script src="assets/js/shop.js"></script>
+</body>
+</html>
