@@ -2,7 +2,9 @@
 // center on a white square with padding + soft shadow, export webp + thumb.
 // Nothing leaves the device here — only the finished blobs are returned.
 window.ImgPipeline = (function () {
-  const DEFAULTS = { size: 1200, thumb: 400, pad: 120, bg: "#ffffff" };
+  // pad is deliberately tight: the product should fill the frame, since the
+  // background is already gone. It only needs to clear the drop shadow below.
+  const DEFAULTS = { size: 1200, thumb: 400, pad: 36, bg: "#ffffff" };
 
   // --- pure helpers (unit-tested) ---
   function _contentBounds(img) {
@@ -44,9 +46,10 @@ window.ImgPipeline = (function () {
     const { dw, dh } = _fitBox(bounds.w, bounds.h, size, pad);
     const dx = (size - dw) / 2, dy = (size - dh) / 2;
     ctx.save();
+    // Shadow has to fit inside `pad` or it gets clipped at the canvas edge.
     ctx.shadowColor = "rgba(28,26,23,0.18)";
-    ctx.shadowBlur = size * 0.03;
-    ctx.shadowOffsetY = size * 0.02;
+    ctx.shadowBlur = size * 0.015;
+    ctx.shadowOffsetY = size * 0.008;
     ctx.drawImage(cutCanvas, bounds.x, bounds.y, bounds.w, bounds.h, dx, dy, dw, dh);
     ctx.restore();
     return c;
