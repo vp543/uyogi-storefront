@@ -15,8 +15,19 @@ export const SB = {
   pubBucket: PUB,
   rawBucket: RAW,
   async signIn(email, pw) { return client.auth.signInWithPassword({ email, password: pw }); },
-  async signUp(email, pw, fullName) {
-    return client.auth.signUp({ email, password: pw, options: { data: { full_name: fullName } } });
+  async signUp(email, pw, fullName, accessCode) {
+    // access_code is validated by a BEFORE INSERT trigger on auth.users and
+    // stripped there, so it never persists on the account.
+    return client.auth.signUp({
+      email, password: pw,
+      options: { data: { full_name: fullName, access_code: accessCode || "" } },
+    });
+  },
+  // Yes/no only — the code itself is never sent to the browser.
+  async checkAccessCode(code) {
+    const { data, error } = await client.rpc("check_access_code", { code });
+    if (error) throw error;
+    return data === true;
   },
   async signOut() { return client.auth.signOut(); },
 
@@ -33,6 +44,17 @@ export const SB = {
   async listStaff() {
     const { data, error } = await client.from("staff").select("*").order("requested_at", { ascending: false });
     if (error) throw error; return data || [];
+  },
+  // Owner-only: read / change the shared signup code ('' disables the check).
+  async getAccessCode() {
+    const { data, error } = await client.from("signup_settings").select("access_code").eq("id", 1).maybeSingle();
+    if (error) throw error;
+    return data ? data.access_code : null;
+  },
+  async setAccessCode(code) {
+    const { error } = await client.from("signup_settings")
+      .update({ access_code: code, updated_at: new Date().toISOString() }).eq("id", 1);
+    if (error) throw error;
   },
   async setStaffStatus(id, status) {
     const me = await SB.user();

@@ -68,6 +68,9 @@ async function loadData() {
   const rows = await SB.listPhotos();
   state.haspic = new Set(rows.filter((r) => r.status === "active").map((r) => r.sku));
   state.staff = state.me.role === "owner" ? await SB.listStaff() : [];
+  if (state.me.role === "owner") {
+    try { state.code = await SB.getAccessCode(); } catch (_) { state.code = null; }
+  }
 }
 
 function renderList() {
@@ -93,6 +96,20 @@ function renderList() {
     b.addEventListener("click", () => openCapture(b.getAttribute("data-pick"))));
   document.querySelectorAll("[data-decide]").forEach((b) =>
     b.addEventListener("click", () => decide(b.getAttribute("data-decide"), b.getAttribute("data-status"))));
+  if ($("code-save")) $("code-save").addEventListener("click", saveCode);
+}
+
+async function saveCode() {
+  const next = $("code-input").value.trim();
+  state.codeMsg = "";
+  try {
+    await SB.setAccessCode(next);
+    state.code = next;
+    state.codeMsg = next ? "Saved." : "Saved — the code is now off.";
+  } catch (err) {
+    state.codeMsg = "Couldn't save the code: " + err.message;
+  }
+  renderList();
 }
 
 // ── Owner-only: staff approval queue ───────────────────────────────────
@@ -131,7 +148,24 @@ function approvalsHTML() {
         ? `<ul class="staff__list">${pendingRows}</ul>`
         : `<p class="admin__sub">No requests waiting. Share <b>signup.html</b> with an employee to let them ask for access.</p>`}
       ${team.length ? `<h3 class="staff__sub">Team</h3><ul class="staff__list">${teamRows}</ul>` : ""}
+      ${codeHTML()}
     </section>`;
+}
+
+// Owner-only: the shared code employees must type on the signup page.
+function codeHTML() {
+  if (state.code === null || state.code === undefined) return "";
+  const off = state.code === "";
+  return `
+    <h3 class="staff__sub">Signup access code</h3>
+    <p class="admin__sub">${off
+      ? "<b>Off</b> — anyone with the signup link can request an account."
+      : "Employees must type this on the signup page. Give it to them yourself; never post it publicly."}</p>
+    <div class="staff__code">
+      <input id="code-input" type="text" value="${esc(state.code)}" placeholder="Leave empty to turn the code off" spellcheck="false">
+      <button class="btn btn--primary" id="code-save">Save code</button>
+    </div>
+    ${state.codeMsg ? `<p class="admin__sub">${esc(state.codeMsg)}</p>` : ""}`;
 }
 
 async function decide(id, status) {
