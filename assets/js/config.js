@@ -21,8 +21,8 @@ window.UYOGI_CONFIG = {
   // exactly as a static catalog (the "photo pending" look). Fill these in
   // from Supabase → Project Settings → API (see docs/supabase-setup.md).
   supabase: {
-    url: "",       // e.g. https://xxxx.supabase.co
-    anonKey: "",   // anon public key (safe to expose; RLS protects the data)
+    url: "https://gbdxqkxwfuxkotlxdnzf.supabase.co",
+    anonKey: "sb_publishable_VBzyeptVL9BJREglciz8nw_SHg766TR",   // publishable key (safe to expose; RLS protects the data)
   },
   photos: {
     bucket: "product-photos",   // public bucket holding <sku>/main.webp + thumb.webp
