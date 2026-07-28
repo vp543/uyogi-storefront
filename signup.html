@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>UYOGI · Request staff access</title>
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body class="admin">
+  <header class="admin__bar">
+    <img class="brand__logo" src="assets/img/uyogi-logo.png" alt="UYOGI" style="height:34px">
+    <span class="admin__tag">Staff · Request access</span>
+  </header>
+
+  <main id="setup" class="admin__login" hidden>
+    <div class="admin__card">
+      <h1>Not set up yet</h1>
+      <p class="admin__sub">The photo backend isn't connected yet. Ask the owner to finish setup.</p>
+    </div>
+  </main>
+
+  <main id="form-wrap" class="admin__login" hidden>
+    <form id="signup-form" class="admin__card">
+      <h1>Request staff access</h1>
+      <p class="admin__sub">Create your account for the product photo tool. The owner has to approve it before you can start.</p>
+      <div class="field"><label for="n">Your name</label><input id="n" type="text" required autocomplete="name"></div>
+      <div class="field"><label for="e">Email</label><input id="e" type="email" required autocomplete="username"></div>
+      <div class="field"><label for="p">Password</label><input id="p" type="password" required minlength="8" autocomplete="new-password"></div>
+      <div class="field"><label for="p2">Confirm password</label><input id="p2" type="password" required minlength="8" autocomplete="new-password"></div>
+      <button class="btn btn--primary btn--block btn--lg" id="submit" type="submit">Send request</button>
+      <p id="err" class="admin__err" hidden></p>
+      <p class="admin__sub" style="margin-top:14px">Already approved? <a href="admin.html">Sign in</a></p>
+    </form>
+  </main>
+
+  <main id="done" class="admin__login" hidden>
+    <div class="admin__card">
+      <h1>Request sent</h1>
+      <p class="admin__sub">Your account has been created and is <b>waiting for the owner to approve it</b>. You'll be able to sign in once it's approved — nothing else to do for now.</p>
+      <p class="admin__sub"><a href="admin.html">Go to sign in</a></p>
+    </div>
+  </main>
+
+  <script src="assets/js/config.js"></script>
+  <script type="module" src="assets/js/signup.js"></script>
+</body>
+</html>

@@ -42,3 +42,19 @@
 .cap__preview { width: 100%; height: 100%; object-fit: contain; }
 .cap__spin { color: var(--steel); font-family: var(--font-mono); font-size: 13px; }
 .cap__actions { display: flex; gap: 12px; justify-content: flex-end; align-items: center; }
+
+/* Access gate (signed in, not approved yet) */
+.admin__gate { max-width: 520px; margin: 60px auto; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; text-align: center; }
+.admin__gate h1 { font-size: 24px; margin-bottom: 8px; }
+
+/* Owner-only staff approval queue */
+.staff { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; margin-top: 22px; }
+.staff__title { font-size: 18px; display: flex; align-items: center; gap: 10px; }
+.staff__sub { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--steel); margin-top: 18px; }
+.staff__badge { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; background: var(--sun-050); color: var(--sun-deep); padding: 4px 8px; border-radius: 6px; }
+.staff__list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.staff__row { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 14px; }
+.staff__who { display: flex; flex-direction: column; min-width: 0; }
+.staff__who b { font-family: var(--font-display); font-size: 15px; color: var(--ink); }
+.staff__who small { font-family: var(--font-mono); font-size: 11.5px; color: var(--steel); }
+.staff__acts { display: flex; gap: 8px; align-items: center; }
