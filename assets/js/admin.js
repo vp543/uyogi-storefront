@@ -426,6 +426,9 @@ function openCapture(sku) {
       <div class="ed__result"><img id="ed-out" alt="How it will look on the website"></div>`;
     let seq = 0;
     const recompose = async () => {
+      // mountEditor fires onChange once during mount, before `editor` is
+      // assigned below. The explicit call after mounting covers that case.
+      if (!editor) return;
       const mine = ++seq;
       const result = await ImgPipeline.compose(editor.getResult());
       if (mine !== seq) return;         // a newer edit landed while we encoded
