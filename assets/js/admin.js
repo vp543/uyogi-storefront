@@ -312,6 +312,7 @@ function openCapture(sku) {
   // are about to replace instead of an empty "take a photo" placeholder.
   function renderCurrent() {
     processed = null;
+    stage.classList.remove("is-editing");
     const src = SB.publicUrl(SB.pubBucket, `${sku}/main.webp`) + `?t=${Date.now()}`;
     stage.innerHTML = `<img class="cap__preview" src="${src}" alt="Current photo of ${esc(p.name)}">`;
     setStatus("Current photo");
@@ -320,6 +321,7 @@ function openCapture(sku) {
 
   function renderDrop() {
     processed = null;
+    stage.classList.remove("is-editing");
     setStatus("");
     // Two separate inputs on purpose. `capture` sends Android straight to the
     // camera app with no gallery option, and that hand-off is what makes the
@@ -379,6 +381,7 @@ function openCapture(sku) {
     diag("stage 1 edit");
     processed = null;
     killEditor();
+    stage.classList.add("is-editing");
     stage.innerHTML = `<div id="ed-host" style="width:100%"></div>`;
     editor = ImgEdit.mountEditor($("ed-host"), raw, {});
     setStatus("Straighten or crop if you need to, then Continue.");
@@ -394,6 +397,7 @@ function openCapture(sku) {
     if (!edited) return;
     killEditor();
     setStatus("Cleaning up the photo… the first one on this phone takes a few minutes while it sets up. Stay on WiFi.");
+    stage.classList.remove("is-editing");
     stage.innerHTML = `<div class="cap__spin">Processing…</div>`;
     actions.hidden = true;
     try {
@@ -412,6 +416,7 @@ function openCapture(sku) {
   function renderAdjust() {
     diag("stage 2 edit");
     killEditor();
+    stage.classList.add("is-editing");
     stage.innerHTML = `
       <div id="ed-host" style="width:100%"></div>
       <div class="ed__result"><img id="ed-out" alt="How it will look on the website"></div>`;
