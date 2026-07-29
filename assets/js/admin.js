@@ -26,6 +26,13 @@ function renderDiag() {
   const b = $("diag-body");
   if (b) b.textContent = diagList().join("\n") || "(nothing logged yet)";
 }
+// The background remover downloads ~52 MB the first time it runs on a phone
+// and the browser keeps it cached. Remember that it happened, so the WiFi
+// warning shows to staff who still face the download and nobody else.
+const READYKEY = "uyogi.model.ready";
+function modelReady() { try { return localStorage.getItem(READYKEY) === "1"; } catch (_) { return false; } }
+function markModelReady() { try { localStorage.setItem(READYKEY, "1"); } catch (_) {} }
+
 window.addEventListener("error", (e) => diag("JS ERROR: " + e.message));
 window.addEventListener("unhandledrejection", (e) => diag("PROMISE REJECTED: " + (e.reason && e.reason.message || e.reason)));
 document.addEventListener("visibilitychange", () => diag("page " + document.visibilityState));
@@ -285,6 +292,7 @@ function openCapture(sku) {
         <h2>${esc(p.name)}</h2>
         <p class="admin__sub">${esc(p.code || "—")} · ${esc(p.category)}</p>
         <div class="cap__stage" id="cap-stage"></div>
+        <div class="cap__note" id="cap-note" hidden></div>
         <div class="cap__actions" id="cap-actions" hidden></div>
         <p id="cap-status" class="admin__sub" hidden></p>
       </div>
@@ -295,6 +303,7 @@ function openCapture(sku) {
   let editor = null;     // live ImgEdit instance, if a stage is showing one
   const stage = $("cap-stage"), status = $("cap-status"), actions = $("cap-actions");
   const setStatus = (m) => { status.textContent = m; status.hidden = !m; };
+  const setNote = (html) => { const n = $("cap-note"); if (n) { n.innerHTML = html || ""; n.hidden = !html; } };
   const close = () => {
     try { sessionStorage.removeItem("uyogi.capture"); } catch (_) {}
     killEditor();
@@ -316,6 +325,7 @@ function openCapture(sku) {
   // are about to replace instead of an empty "take a photo" placeholder.
   function renderCurrent() {
     processed = null;
+    setNote("");
     stage.classList.remove("is-editing");
     const src = SB.publicUrl(SB.pubBucket, `${sku}/main.webp`) + `?t=${Date.now()}`;
     stage.innerHTML = `<img class="cap__preview" src="${src}" alt="Current photo of ${esc(p.name)}">`;
@@ -343,7 +353,45 @@ function openCapture(sku) {
       $(id).addEventListener("change", onFile);
       $(id).addEventListener("click", () => diag(id === "cap-file" ? "camera opened" : "gallery picker opened"));
     }
+    // Say the size out loud BEFORE they shoot, not after — on mobile data this
+    // download is the difference between "slow" and "gave up".
+    if (modelReady()) setNote("");
+    else setNote(`
+      <p>This phone still needs a one-time <b>${ImgPipeline.firstRunMB} MB</b> download before it can clean up photos.
+         Do it on WiFi — after that, photos are quick and work anywhere.</p>
+      <button class="btn btn--ghost" id="cap-prep" type="button">Download it now</button>`);
+    if ($("cap-prep")) $("cap-prep").addEventListener("click", prepare);
     renderActions();
+  }
+
+  // Fetch the model without taking a photo, so the big download can happen on
+  // WiFi at the shop instead of on mobile data in front of a customer.
+  async function prepare() {
+    diag("preload started");
+    setNote(`<p id="prep-msg">Starting the download…</p>`);
+    try {
+      await ImgPipeline.preload(onModelStatus((m) => { const el = $("prep-msg"); if (el) el.textContent = m; }));
+      markModelReady();
+      diag("preload OK");
+      setNote(`<p>Ready — this phone can now clean up photos anywhere.</p>`);
+    } catch (err) {
+      diag("PRELOAD FAILED: " + err.message);
+      setNote(`<p>That didn't finish: ${esc(err.message)}</p>
+               <button class="btn btn--ghost" id="cap-prep" type="button">Try again</button>`);
+      if ($("cap-prep")) $("cap-prep").addEventListener("click", prepare);
+    }
+  }
+
+  // Shared progress plumbing: paint every message, but only log the milestones
+  // so 42 MB of chunk events can't flood the diagnostics log.
+  function onModelStatus(paint) {
+    let logged = -1;
+    return (msg, pct) => {
+      paint(msg);
+      if (pct == null) { diag(msg); return; }
+      const bucket = Math.floor(pct / 25);
+      if (bucket > logged) { logged = bucket; diag("download " + pct + "%"); }
+    };
   }
 
   async function onFile(e) {
@@ -400,12 +448,16 @@ function openCapture(sku) {
     const edited = editor ? editor.getResult() : null;
     if (!edited) return;
     killEditor();
-    setStatus("Cleaning up the photo… the first one on this phone takes a few minutes while it sets up. Stay on WiFi.");
+    setNote("");
+    setStatus(modelReady()
+      ? "Cleaning up the photo…"
+      : `Setting up this phone — about ${ImgPipeline.firstRunMB} MB to download, once. Stay on WiFi.`);
     stage.classList.remove("is-editing");
     stage.innerHTML = `<div class="cap__spin">Processing…</div>`;
     actions.hidden = true;
     try {
-      cut = await ImgPipeline.cutout(edited);
+      cut = await ImgPipeline.cutout(edited, null, onModelStatus(setStatus));
+      markModelReady();
       diag("cutout OK");
       renderAdjust();
     } catch (err) {

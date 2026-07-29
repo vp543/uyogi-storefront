@@ -42,6 +42,11 @@
 .cap__preview { width: 100%; height: 100%; object-fit: contain; }
 .cap__spin { color: var(--steel); font-family: var(--font-mono); font-size: 13px; }
 .cap__actions { display: flex; gap: 12px; justify-content: flex-end; align-items: center; }
+/* First-run download notice. Lives outside .cap__stage on purpose — the stage
+   is a fixed 1:1 box with overflow:hidden and would clip it. */
+.cap__note { margin: 0 0 14px; padding: 12px 14px; background: var(--paper-2); border: 1px solid var(--line); border-left: 3px solid var(--sun); border-radius: var(--radius-sm); font-size: 13px; color: var(--ink-800); }
+.cap__note p { margin: 0 0 10px; }
+.cap__note p:last-child { margin-bottom: 0; }
 
 /* Access gate (signed in, not approved yet) */
 .admin__gate { max-width: 520px; margin: 60px auto; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; text-align: center; }
