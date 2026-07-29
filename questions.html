@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Details we still need · UYOGI website</title>
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css?v=20260729d">
+  <style>
+    .qz { max-width: 720px; margin: 0 auto; padding: 26px 0 90px; }
+    .qz__lead { color: var(--steel); margin: 10px 0 0; }
+    .qz__sec { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; margin-top: 18px; }
+    .qz__sec > h2 { font-size: 19px; margin: 0 0 4px; }
+    .qz__sec > p.sub { color: var(--steel); font-size: 14px; margin: 0 0 16px; }
+    .qz__q { margin-bottom: 16px; }
+    .qz__q > label, .qz__q > legend { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+    .qz__q .hint { display: block; font-weight: 400; color: var(--steel); font-size: 13px; margin-top: 2px; }
+    .qz__q input[type=text], .qz__q input[type=tel], .qz__q input[type=email], .qz__q textarea {
+      width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: var(--radius-sm);
+      font: inherit; font-size: 16px; background: var(--paper); color: var(--ink-800); }
+    .qz__q textarea { min-height: 88px; resize: vertical; }
+    .qz__q fieldset { border: 0; padding: 0; margin: 0; }
+    .qz__opts { display: flex; flex-wrap: wrap; gap: 8px; }
+    .qz__opt { display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px; border: 1px solid var(--line);
+      border-radius: 999px; font-size: 14px; cursor: pointer; background: var(--paper); }
+    .qz__opt input { accent-color: var(--sun); }
+    .qz__opt:has(input:checked) { border-color: var(--sun); background: #fff6ec; font-weight: 600; }
+    .req { color: var(--red); font-weight: 700; }
+    .qz__bar { position: sticky; bottom: 0; margin-top: 20px; background: var(--ink); color: #fff;
+      border-radius: var(--radius); padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .qz__count { font-family: var(--font-mono); font-size: 13px; margin-right: auto; }
+    .qz__bar .btn { white-space: nowrap; }
+    .qz__done { background: var(--stock); color: #06301a; }
+    @media (max-width: 560px) { .qz__bar { flex-direction: column; align-items: stretch; } .qz__count { margin: 0 0 4px; } }
+  </style>
+</head>
+<body>
+  <!-- No site nav on purpose: this is an internal page, not part of the shop. -->
+  <header style="border-bottom:1px solid var(--line);background:#fff">
+    <div class="wrap" style="padding:12px 0">
+      <img src="assets/img/uyogi-logo.png" alt="UYOGI" style="height:34px">
+    </div>
+  </header>
+
+  <main class="wrap qz">
+    <span class="eyebrow">UYOGI website</span>
+    <h1 style="font-size:clamp(24px,3.4vw,34px);font-weight:800;margin-top:8px">Details we still need from you</h1>
+    <p class="qz__lead">
+      Answer what you can — it saves on this phone as you type, so you can stop and come back later.
+      Questions marked <span class="req">*</span> are the ones holding up work on the site.
+      When you're done, press <b>Copy all answers</b> at the bottom and send them to Vraj on WhatsApp or email.
+    </p>
+
+    <form id="qz-form" autocomplete="off">
+
+      <section class="qz__sec">
+        <h2>1. Contact details</h2>
+        <p class="sub">These go in the footer of every page. Right now the site only shows an email address.</p>
+
+        <div class="qz__q">
+          <label for="q-phone">Phone number for customers <span class="req">*</span>
+            <span class="hint">The number you want printed on the website.</span></label>
+          <input id="q-phone" type="tel" placeholder="e.g. +250 78 000 0000">
+        </div>
+        <div class="qz__q">
+          <label for="q-wa">WhatsApp number
+            <span class="hint">Leave empty if it's the same as above. Should we add a "Chat on WhatsApp" button?</span></label>
+          <input id="q-wa" type="tel" placeholder="Same as above / +250 …">
+        </div>
+        <div class="qz__q">
+          <label for="q-addr">Shop address, exactly as it should appear <span class="req">*</span>
+            <span class="hint">Street, building, floor, district.</span></label>
+          <textarea id="q-addr" placeholder="e.g. Ubumwe Street, XYZ Building, 2nd floor, Nyarugenge, Kigali"></textarea>
+        </div>
+        <div class="qz__q">
+          <label for="q-maps">Google Maps link or pin
+            <span class="hint">Open Google Maps, find the shop, tap Share, paste the link here.</span></label>
+          <input id="q-maps" type="text" placeholder="https://maps.app.goo.gl/…">
+        </div>
+        <div class="qz__q">
+          <label for="q-hours">Opening hours <span class="req">*</span></label>
+          <textarea id="q-hours" placeholder="Mon–Fri: 8:00–18:00&#10;Sat: 8:00–14:00&#10;Sun: closed"></textarea>
+        </div>
+        <div class="qz__q">
+          <label for="q-email2">Any other email besides yis.kigali@gmail.com?</label>
+          <input id="q-email2" type="text" placeholder="Leave empty if that one is fine">
+        </div>
+        <div class="qz__q">
+          <label for="q-social">Facebook / Instagram / TikTok / LinkedIn pages to link</label>
+          <textarea id="q-social" placeholder="Paste the page links, one per line"></textarea>
+        </div>
+      </section>
+
+      <section class="qz__sec">
+        <h2>2. Prices</h2>
+        <p class="sub">The site currently shows no prices at all — every product says "Request price". You said home appliances have steadier prices, so we can start there.</p>
+
+        <div class="qz__q">
+          <fieldset>
+            <legend>Which categories should show prices first? <span class="req">*</span></legend>
+            <div class="qz__opts" data-multi="q-pricecats">
+              <label class="qz__opt"><input type="checkbox" value="Home appliances"> Home appliances</label>
+              <label class="qz__opt"><input type="checkbox" value="Computers & laptops"> Computers &amp; laptops</label>
+              <label class="qz__opt"><input type="checkbox" value="Printers"> Printers</label>
+              <label class="qz__opt"><input type="checkbox" value="Phones"> Phones</label>
+              <label class="qz__opt"><input type="checkbox" value="Accessories"> Accessories</label>
+              <label class="qz__opt"><input type="checkbox" value="Chairs & furniture"> Chairs &amp; furniture</label>
+              <label class="qz__opt"><input type="checkbox" value="None yet"> None yet — keep everything hidden</label>
+            </div>
+          </fieldset>
+        </div>
+        <div class="qz__q">
+          <fieldset>
+            <legend>Which currency? <span class="req">*</span></legend>
+            <div class="qz__opts" data-single="q-currency">
+              <label class="qz__opt"><input type="radio" name="cur" value="RWF only"> RWF only</label>
+              <label class="qz__opt"><input type="radio" name="cur" value="RWF and USD"> RWF and USD</label>
+              <label class="qz__opt"><input type="radio" name="cur" value="USD only"> USD only</label>
+            </div>
+          </fieldset>
+        </div>
+        <div class="qz__q">
+          <fieldset>
+            <legend>How should a price be shown?</legend>
+            <div class="qz__opts" data-single="q-priceform">
+              <label class="qz__opt"><input type="radio" name="pf" value="Exact price"> Exact price</label>
+              <label class="qz__opt"><input type="radio" name="pf" value="From X (starting price)"> "From X"</label>
+              <label class="qz__opt"><input type="radio" name="pf" value="A price range"> A range</label>
+            </div>
+          </fieldset>
+        </div>
+        <div class="qz__q">
+          <fieldset>
+            <legend>Does the shown price include VAT / EBM?</legend>
+            <div class="qz__opts" data-single="q-vat">
+              <label class="qz__opt"><input type="radio" name="vat" value="Includes VAT"> Includes VAT</label>
+              <label class="qz__opt"><input type="radio" name="vat" value="Excludes VAT"> Excludes VAT</label>
+              <label class="qz__opt"><input type="radio" name="vat" value="Not sure yet"> Not sure yet</label>
+            </div>
+          </fieldset>
+        </div>
+        <div class="qz__q">
+          <label for="q-wholesale">Do businesses / wholesale buyers pay a different price?
+            <span class="hint">If yes, should the website show the retail price only?</span></label>
+          <textarea id="q-wholesale" placeholder="e.g. Yes — businesses get 10% off, show retail price only"></textarea>
+        </div>
+        <div class="qz__q">
+          <label for="q-priceupd">Who updates prices, and how often?
+            <span class="hint">This decides how the price list reaches the website.</span></label>
+          <input id="q-priceupd" type="text" placeholder="e.g. I send an updated Excel every month">
+        </div>
+      </section>
+
+      <section class="qz__sec">
+        <h2>3. Quote requests</h2>
+        <p class="sub">When a customer asks about products, that request has to reach someone. Nothing is set up to record them yet.</p>
+
+        <div class="qz__q">
+          <label for="q-quoteto">Which email should receive quote requests? <span class="req">*</span>
+            <span class="hint">The very first request needs one confirmation click in that inbox — Vraj will walk you through it.</span></label>
+          <input id="q-quoteto" type="text" placeholder="yis.kigali@gmail.com">
+        </div>
+        <div class="qz__q">
+          <label for="q-quotewa">Should requests also arrive on WhatsApp?
+            <span class="hint">If yes, which number.</span></label>
+          <input id="q-quotewa" type="text" placeholder="Yes / No, and the number">
+        </div>
+        <div class="qz__q">
+          <label for="q-respond">Who answers them, and how fast should we promise? <span class="req">*</span>
+            <span class="hint">e.g. "within 24 hours" is printed on the page, so it has to be true.</span></label>
+          <input id="q-respond" type="text" placeholder="e.g. I answer, within one working day">
+        </div>
+        <div class="qz__q">
+          <fieldset>
+            <legend>What should we ask the customer for?
+              <span class="hint">Name and phone are already asked. Tick anything else you need.</span></legend>
+            <div class="qz__opts" data-multi="q-quotefields">
+              <label class="qz__opt"><input type="checkbox" value="Company name"> Company name</label>
+              <label class="qz__opt"><input type="checkbox" value="TIN"> TIN</label>
+              <label class="qz__opt"><input type="checkbox" value="Delivery address"> Delivery address</label>
+              <label class="qz__opt"><input type="checkbox" value="Quantity needed"> Quantity needed</label>
+              <label class="qz__opt"><input type="checkbox" value="Preferred payment method"> Preferred payment</label>
+              <label class="qz__opt"><input type="checkbox" value="Nothing else"> Nothing else</label>
+            </div>
+          </fieldset>
+        </div>
+        <div class="qz__q">
+          <label for="q-delivery">Delivery — where do you deliver, and is there a charge?</label>
+          <textarea id="q-delivery" placeholder="e.g. Free inside Kigali over 100,000 RWF; outside Kigali by bus, customer pays"></textarea>
+        </div>
+      </section>
+
+      <section class="qz__sec">
+        <h2>4. Payment</h2>
+        <p class="sub">Nothing is paid online today. This is only so the site can say what you accept.</p>
+
+        <div class="qz__q">
+          <fieldset>
+            <legend>What do you accept in the shop?</legend>
+            <div class="qz__opts" data-multi="q-pay">
+              <label class="qz__opt"><input type="checkbox" value="Cash"> Cash</label>
+              <label class="qz__opt"><input type="checkbox" value="MoMo"> MoMo</label>
+              <label class="qz__opt"><input type="checkbox" value="Bank transfer"> Bank transfer</label>
+              <label class="qz__opt"><input type="checkbox" value="Card"> Card</label>
+              <label class="qz__opt"><input type="checkbox" value="EBM invoice / on account"> EBM invoice</label>
+            </div>
+          </fieldset>
+        </div>
+        <div class="qz__q">
+          <fieldset>
+            <legend>Do you want customers to pay online one day?</legend>
+            <div class="qz__opts" data-single="q-online">
+              <label class="qz__opt"><input type="radio" name="onl" value="Yes, eventually"> Yes, eventually</label>
+              <label class="qz__opt"><input type="radio" name="onl" value="No, quotes only"> No, quotes only</label>
+              <label class="qz__opt"><input type="radio" name="onl" value="Undecided"> Undecided</label>
+            </div>
+          </fieldset>
+        </div>
+      </section>
+
+      <section class="qz__sec">
+        <h2>5. Photos and stock</h2>
+        <p class="sub">The catalog has 1,827 products and no photos yet. The staff photo tool is live and working.</p>
+
+        <div class="qz__q">
+          <label for="q-first">Which products should be photographed first? <span class="req">*</span>
+            <span class="hint">Your 10–20 best sellers. Names or codes, one per line.</span></label>
+          <textarea id="q-first" placeholder="e.g. HP Deskjet 2130&#10;Hisense 43&quot; TV&#10;…"></textarea>
+        </div>
+        <div class="qz__q">
+          <label for="q-staff">Which employees will take the photos?
+            <span class="hint">Names — each one creates their own account and you approve it.</span></label>
+          <textarea id="q-staff" placeholder="Name — phone number"></textarea>
+        </div>
+        <div class="qz__q">
+          <fieldset>
+            <legend>Should products that are out of stock stay on the website?
+              <span class="hint">They are shown today, and customers can still ask about them.</span></legend>
+            <div class="qz__opts" data-single="q-oos">
+              <label class="qz__opt"><input type="radio" name="oos" value="Yes, keep showing them"> Yes, keep them</label>
+              <label class="qz__opt"><input type="radio" name="oos" value="No, hide them"> No, hide them</label>
+            </div>
+          </fieldset>
+        </div>
+        <div class="qz__q">
+          <label for="q-stockupd">How often will you send an updated stock file?</label>
+          <input id="q-stockupd" type="text" placeholder="e.g. every Monday / when it changes">
+        </div>
+      </section>
+
+      <section class="qz__sec">
+        <h2>6. About the business</h2>
+        <p class="sub">The About page is thin. A few real facts make the site far more convincing to a first-time customer.</p>
+
+        <div class="qz__q">
+          <label for="q-story">When did the business start, and what are you known for?
+            <span class="hint">Two or three sentences in your own words is plenty.</span></label>
+          <textarea id="q-story" placeholder=""></textarea>
+        </div>
+        <div class="qz__q">
+          <label for="q-brands">Brands you are an authorized dealer for
+            <span class="hint">We can show their logos — it builds trust.</span></label>
+          <textarea id="q-brands" placeholder="e.g. HP, Canon, Hisense…"></textarea>
+        </div>
+        <div class="qz__q">
+          <label for="q-tin">Business registration number / TIN for the footer</label>
+          <input id="q-tin" type="text" placeholder="Leave empty if you'd rather not show it">
+        </div>
+        <div class="qz__q">
+          <label for="q-else">Anything else you want changed or added on the website?</label>
+          <textarea id="q-else" placeholder="Say it however you like."></textarea>
+        </div>
+      </section>
+
+      <div class="qz__bar">
+        <span class="qz__count" id="qz-count">0 answered</span>
+        <button type="button" class="btn btn--primary" id="qz-copy">Copy all answers</button>
+        <button type="button" class="btn btn--ghost" id="qz-mail" style="color:#fff;border-color:rgba(255,255,255,.35)">Send by email</button>
+      </div>
+      <p class="form-note" id="qz-note" style="text-align:center">Your answers stay on this phone until you send them.</p>
+    </form>
+  </main>
+
+  <script>
+  (function () {
+    // Self-contained on purpose: no backend, no form service. Answers live in
+    // this phone's localStorage until the owner copies them out, so a half-
+    // finished questionnaire survives closing the browser.
+    var KEY = "uyogi.questions.v1";
+    var SEND_TO = "patel.vraj1789@gmail.com";
+    var form = document.getElementById("qz-form");
+
+    var groups = [];  // {id, kind, root}
+    Array.prototype.forEach.call(form.querySelectorAll("[data-multi],[data-single]"), function (g) {
+      groups.push({
+        id: g.getAttribute("data-multi") || g.getAttribute("data-single"),
+        kind: g.hasAttribute("data-multi") ? "multi" : "single",
+        root: g,
+      });
+    });
+    var texts = Array.prototype.slice.call(form.querySelectorAll("input[type=text],input[type=tel],input[type=email],textarea"));
+
+    function labelFor(el) {
+      var l = el.closest(".qz__q").querySelector("label, legend");
+      // Drop the hint line: the question itself is what belongs in the answer.
+      var clone = l.cloneNode(true);
+      var hint = clone.querySelector(".hint");
+      if (hint) hint.remove();
+      return clone.textContent.replace(/\s+/g, " ").replace(/\s*\*\s*$/, "").trim();
+    }
+
+    function read() {
+      var out = {};
+      texts.forEach(function (t) { if (t.value.trim()) out[t.id] = t.value.trim(); });
+      groups.forEach(function (g) {
+        var picked = Array.prototype.slice.call(g.root.querySelectorAll("input:checked")).map(function (i) { return i.value; });
+        if (picked.length) out[g.id] = picked.join(", ");
+      });
+      return out;
+    }
+
+    function write(saved) {
+      texts.forEach(function (t) { if (saved[t.id]) t.value = saved[t.id]; });
+      groups.forEach(function (g) {
+        var want = (saved[g.id] || "").split(", ");
+        Array.prototype.forEach.call(g.root.querySelectorAll("input"), function (i) {
+          if (want.indexOf(i.value) >= 0) i.checked = true;
+        });
+      });
+    }
+
+    function total() { return texts.length + groups.length; }
+
+    function save() {
+      var data = read();
+      try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
+      document.getElementById("qz-count").textContent =
+        Object.keys(data).length + " of " + total() + " answered";
+    }
+
+    function asText() {
+      var data = read();
+      var lines = ["UYOGI website — answers from the owner", new Date().toDateString(), ""];
+      Array.prototype.forEach.call(form.querySelectorAll(".qz__sec"), function (sec) {
+        var block = [];
+        Array.prototype.forEach.call(sec.querySelectorAll(".qz__q"), function (q) {
+          var el = q.querySelector("input[type=text],input[type=tel],input[type=email],textarea");
+          var grp = q.querySelector("[data-multi],[data-single]");
+          var id = el ? el.id
+                 : grp ? (grp.getAttribute("data-multi") || grp.getAttribute("data-single"))
+                 : null;
+          if (!id || !data[id]) return;
+          var q1 = labelFor(el || grp);
+          block.push("- " + q1 + (/\?$/.test(q1) ? "" : ":") + "\n  " + data[id]);
+        });
+        if (block.length) {
+          lines.push(sec.querySelector("h2").textContent.toUpperCase());
+          lines.push(block.join("\n"));
+          lines.push("");
+        }
+      });
+      if (lines.length <= 3) return "";
+      return lines.join("\n");
+    }
+
+    var note = document.getElementById("qz-note");
+    document.getElementById("qz-copy").addEventListener("click", function () {
+      var text = asText();
+      if (!text) { note.textContent = "Answer something first."; return; }
+      function ok() {
+        note.textContent = "Copied. Now paste it to Vraj on WhatsApp or email.";
+        document.getElementById("qz-copy").classList.add("qz__done");
+      }
+      if (navigator.clipboard) navigator.clipboard.writeText(text).then(ok, fallback);
+      else fallback();
+      function fallback() {
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); ok(); }
+        catch (e) { note.textContent = "Couldn't copy automatically — use Send by email instead."; }
+        document.body.removeChild(ta);
+      }
+    });
+
+    document.getElementById("qz-mail").addEventListener("click", function () {
+      var text = asText();
+      if (!text) { note.textContent = "Answer something first."; return; }
+      window.location.href = "mailto:" + SEND_TO
+        + "?subject=" + encodeURIComponent("UYOGI website — owner answers")
+        + "&body=" + encodeURIComponent(text);
+    });
+
+    try { write(JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
+    form.addEventListener("input", save);
+    form.addEventListener("change", save);
+    save();
+  })();
+  </script>
+</body>
+</html>
