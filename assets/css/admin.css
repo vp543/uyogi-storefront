@@ -32,8 +32,18 @@
 .admin__empty { color: var(--steel); padding: 30px; }
 
 /* Capture / preview modal */
-.cap { position: fixed; inset: 0; background: rgba(28,26,23,.55); display: grid; place-items: center; z-index: 80; padding: 16px; }
-.cap__panel { background: #fff; border-radius: var(--radius); padding: 22px; width: 100%; max-width: 460px; position: relative; }
+/* Flex + margin:auto, NOT grid + place-items:center. A centred grid item that
+   is taller than the viewport overflows past the top edge into space that
+   cannot be scrolled to — which is exactly what happened to the editor on a
+   phone. With this the panel centres when it fits and scrolls when it doesn't. */
+.cap { position: fixed; inset: 0; background: rgba(28,26,23,.55); display: flex; z-index: 80; padding: 16px;
+       overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+       /* Reserve the scrollbar gutter always. Without it the panel changes width
+          the moment the modal becomes scrollable, which re-fits the editor
+          smaller, which removes the scrollbar, which widens it again — the
+          editor flickers between two sizes on narrow screens. */
+       scrollbar-gutter: stable; }
+.cap__panel { background: #fff; border-radius: var(--radius); padding: 22px; width: 100%; max-width: 460px; position: relative; margin: auto; }
 .cap__panel h2 { font-size: 20px; }
 .cap__x { position: absolute; top: 12px; right: 14px; background: none; border: 0; font-size: 18px; color: var(--steel); line-height: 1; }
 .cap__stage { margin: 14px 0; aspect-ratio: 1; background: var(--paper-2); border: 1px solid var(--line); border-radius: var(--radius-sm); display: grid; place-items: center; overflow: hidden; }
@@ -92,7 +102,10 @@
 .ed__slider input { flex: 1; }
 .ed__hint { font-size: 12px; color: var(--steel-2); margin: 0; }
 .ed__result { margin-top: 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden; background: #fff; }
-.ed__result img { width: 100%; display: block; }
+/* Capped: stage 2 shows the editor AND this preview, and a full-width square
+   preview alone ate a whole phone screen. No coordinate maths reads this one,
+   so limiting it in CSS is safe. */
+.ed__result img { width: 100%; max-height: 30vh; object-fit: contain; display: block; }
 
 /* While an editor is mounted the stage must not be a fixed square with hidden
    overflow, or the rotate buttons and slider get clipped out of sight. */

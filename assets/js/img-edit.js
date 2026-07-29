@@ -111,11 +111,30 @@ window.ImgEdit = (function () {
       return { quarter: edit.quarter, angle: edit.angle, crop: edit.crop ? { ...edit.crop } : null };
     }
 
+    // Usable width INSIDE the stage. clientWidth includes its own padding, and
+    // sizing the canvas to that overflowed the content box on narrow screens —
+    // `max-width:100%` then shrank the canvas in CSS only, leaving every crop
+    // coordinate pointing at the wrong pixel.
+    let lastW = 0;
+    function availWidth() {
+      const cs = getComputedStyle(stage);
+      const pad = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+      return Math.max(80, (stage.clientWidth || 300) - pad);
+    }
+
     // Redraw the preview from the source, then place the crop overlay on top.
     function redraw() {
       rotated = applyEdit(source, { quarter: edit.quarter, angle: edit.angle, crop: null });
-      const maxW = stage.clientWidth || 300;
-      const scale = Math.min(1, maxW / rotated.width);
+      // Fit the preview to BOTH dimensions. Sizing on width alone turned a
+      // portrait phone photo into a canvas taller than the phone itself, which
+      // pushed the crop controls and the Publish button off-screen.
+      // The canvas is scaled here rather than in CSS on purpose: every crop
+      // coordinate is read back through canvas.width, so a CSS-only resize
+      // would silently move the crop box away from where it was drawn.
+      const maxW = availWidth();
+      const maxH = opts.maxHeight || Math.max(220, Math.round((window.innerHeight || 700) * 0.55));
+      lastW = maxW;
+      const scale = Math.min(1, maxW / rotated.width, maxH / rotated.height);
       canvas.width = Math.round(rotated.width * scale);
       canvas.height = Math.round(rotated.height * scale);
       canvas.getContext("2d").drawImage(rotated, 0, 0, canvas.width, canvas.height);
@@ -123,7 +142,16 @@ window.ImgEdit = (function () {
       if (opts.onChange) opts.onChange(getEdit());
     }
 
-    const scaleFactor = () => (rotated ? canvas.width / rotated.width : 1);
+    // Measured from what is ON SCREEN, not from the canvas attribute. If any
+    // layout pressure makes CSS scale the canvas (`max-width:100%` on a very
+    // narrow phone), the attribute size stops matching the drawn size and every
+    // crop coordinate silently shifts. Reading the rendered box keeps the crop
+    // box, the finger and the source pixels in agreement either way.
+    const scaleFactor = () => {
+      if (!rotated) return 1;
+      const shown = canvas.getBoundingClientRect().width || canvas.width;
+      return shown / rotated.width;
+    };
 
     function placeCrop() {
       if (!edit.crop) { cropBox.hidden = true; return; }
@@ -203,6 +231,23 @@ window.ImgEdit = (function () {
       redraw();
     });
 
+    // Turning the phone sideways changes both budgets, so re-fit. Debounced:
+    // Android fires resize repeatedly while the address bar slides away.
+    let refit = null;
+    const onResize = () => { clearTimeout(refit); refit = setTimeout(redraw, 150); };
+    window.addEventListener("resize", onResize);
+    window.addEventListener("orientationchange", onResize);
+
+    // Layout is not final at mount: the modal's scrollbar appears once the
+    // content is tall enough, which narrows the panel AFTER the canvas has been
+    // sized. Re-fit whenever the stage's width really changes. Guarded on width
+    // alone, because redrawing changes the stage's HEIGHT and would otherwise
+    // retrigger this observer forever.
+    const ro = typeof ResizeObserver !== "undefined"
+      ? new ResizeObserver(() => { if (Math.abs(availWidth() - lastW) >= 1) redraw(); })
+      : null;
+    if (ro) ro.observe(stage);
+
     redraw();
 
     return {
@@ -211,6 +256,10 @@ window.ImgEdit = (function () {
       isValid: () => !edit.crop || (edit.crop.w >= MIN_CROP && edit.crop.h >= MIN_CROP),
       destroy: () => {
         window.removeEventListener("pointerup", onUp);
+        window.removeEventListener("resize", onResize);
+        window.removeEventListener("orientationchange", onResize);
+        if (ro) ro.disconnect();
+        clearTimeout(refit);
         container.innerHTML = "";
       },
     };
