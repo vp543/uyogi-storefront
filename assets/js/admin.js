@@ -111,7 +111,7 @@ function reopenInterruptedCapture() {
   openCapture(sku);
   const s = $("cap-status");
   if (s) {
-    s.textContent = "Your phone reloaded the page while the camera was open, so that photo was lost. Take it again — or tap “choose an image” and pick it from your gallery, which is more reliable.";
+    s.textContent = "Your phone reloaded the page while the camera was open, so that photo was lost. Take it again — or take it with your normal camera app first and use “Choose from gallery” below, which is more reliable.";
     s.hidden = false;
   }
 }
