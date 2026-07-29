@@ -287,10 +287,13 @@ function openCapture(sku) {
     </div>`);
 
   let processed = null, originalFile = null;
+  let cut = null;        // transparent cut-out, kept so stage 2 never re-runs the model
+  let editor = null;     // live ImgEdit instance, if a stage is showing one
   const stage = $("cap-stage"), status = $("cap-status"), actions = $("cap-actions");
   const setStatus = (m) => { status.textContent = m; status.hidden = !m; };
   const close = () => {
     try { sessionStorage.removeItem("uyogi.capture"); } catch (_) {}
+    killEditor();
     const c = $("cap"); if (c) c.remove();
   };
 
@@ -343,19 +346,88 @@ function openCapture(sku) {
     if (!file) { diag("no file returned — aborted"); return; }
     originalFile = file;
     diag("file received: " + Math.round(file.size / 1024) + " KB, " + (file.type || "unknown type"));
-    setStatus("Cleaning up the photo… (first run downloads a small model)");
-    stage.innerHTML = `<div class="cap__spin">Processing…</div>`;
     try {
-      processed = await ImgPipeline.processImage(file);
-      diag("processed OK");
-      stage.innerHTML = `<img class="cap__preview" src="${URL.createObjectURL(processed.mainBlob)}" alt="preview">`;
-      setStatus("");
-      renderActions();
+      const raw = await fileToCanvas(file);
+      renderTrim(raw);
+    } catch (err) {
+      diag("COULD NOT READ IMAGE: " + err.message);
+      setStatus("Couldn't read that photo. Try another one.");
+      renderDrop();
+    }
+  }
+
+  function fileToCanvas(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const c = document.createElement("canvas");
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
+        c.getContext("2d").drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+        resolve(c);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("decode failed")); };
+      img.src = url;
+    });
+  }
+
+  function killEditor() { if (editor) { editor.destroy(); editor = null; } }
+
+  // Stage 1 — straighten and crop the raw photo, before the model sees it.
+  function renderTrim(raw) {
+    diag("stage 1 edit");
+    processed = null;
+    killEditor();
+    stage.innerHTML = `<div id="ed-host" style="width:100%"></div>`;
+    editor = ImgEdit.mountEditor($("ed-host"), raw, {});
+    setStatus("Straighten or crop if you need to, then Continue.");
+    actions.innerHTML = `
+      <button class="btn btn--ghost" id="cap-retake">Retake</button>
+      <button class="btn btn--primary" id="cap-continue">Continue</button>`;
+    actions.hidden = false;
+  }
+
+  // The slow step, run exactly once per photo.
+  async function runCutout() {
+    const edited = editor ? editor.getResult() : null;
+    if (!edited) return;
+    killEditor();
+    setStatus("Cleaning up the photo… the first one on this phone takes a few minutes while it sets up. Stay on WiFi.");
+    stage.innerHTML = `<div class="cap__spin">Processing…</div>`;
+    actions.hidden = true;
+    try {
+      cut = await ImgPipeline.cutout(edited);
+      diag("cutout OK");
+      renderAdjust();
     } catch (err) {
       diag("PROCESSING FAILED: " + err.message);
       setStatus("Couldn't process that image. Try another. (" + err.message + ")");
-      renderDrop();
+      renderTrim(edited);   // keep their work rather than sending them back to the camera
     }
+  }
+
+  // Stage 2 — same controls on the finished white-background result. Instant,
+  // because it re-composites the cached cut-out instead of re-running the model.
+  function renderAdjust() {
+    diag("stage 2 edit");
+    killEditor();
+    stage.innerHTML = `
+      <div id="ed-host" style="width:100%"></div>
+      <div class="ed__result"><img id="ed-out" alt="How it will look on the website"></div>`;
+    let seq = 0;
+    const recompose = async () => {
+      const mine = ++seq;
+      const result = await ImgPipeline.compose(editor.getResult());
+      if (mine !== seq) return;         // a newer edit landed while we encoded
+      processed = result;
+      const out = $("ed-out");
+      if (out) out.src = URL.createObjectURL(result.mainBlob);
+      renderActions();
+    };
+    editor = ImgEdit.mountEditor($("ed-host"), cut, { onChange: recompose });
+    setStatus("This is how it will look on the website.");
+    recompose();
   }
 
   async function publish() {
@@ -389,8 +461,9 @@ function openCapture(sku) {
   }
 
   actions.addEventListener("click", (e) => {
-    if (e.target.id === "cap-retake") hadPhoto ? renderCurrent() : renderDrop();
+    if (e.target.id === "cap-retake") { killEditor(); hadPhoto ? renderCurrent() : renderDrop(); }
     else if (e.target.id === "cap-replace") renderDrop();
+    else if (e.target.id === "cap-continue") runCutout();
     else if (e.target.id === "cap-publish") publish();
     else if (e.target.id === "cap-remove") remove();
   });

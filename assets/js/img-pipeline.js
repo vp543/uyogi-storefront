@@ -63,25 +63,43 @@ window.ImgPipeline = (function () {
     return c;
   }
 
-  // Main entry. removeBg is injected so tests can stub it (no model download).
-  async function processImage(file, opts = {}, removeBg) {
-    const o = { ...DEFAULTS, ...opts };
+  // The slow half: download/run the model and return the transparent cut-out.
+  // Accepts a File/Blob straight from the camera, or a canvas the user has
+  // already rotated and cropped. removeBg is injected so tests can stub it.
+  async function cutout(input, removeBg) {
     if (!removeBg) {
       const mod = await import("https://esm.sh/@imgly/background-removal@1.5.5");
       removeBg = mod.removeBackground;
     }
-    const cutBlob = await removeBg(file);          // PNG blob (transparent background)
+    const source = (typeof HTMLCanvasElement !== "undefined" && input instanceof HTMLCanvasElement)
+      ? await new Promise((r) => input.toBlob(r, "image/png"))
+      : input;
+    const cutBlob = await removeBg(source);        // PNG blob (transparent background)
     const cutImg = await _blobToImage(cutBlob);
     const cut = document.createElement("canvas");
     cut.width = cutImg.naturalWidth; cut.height = cutImg.naturalHeight;
     cut.getContext("2d").drawImage(cutImg, 0, 0);
-
-    const main = _compose(cut, o.size, o.pad, o.bg);
-    const thumb = _resize(main, o.thumb);
-    const mainBlob = await _toBlob(main, "image/webp", 0.9);
-    const thumbBlob = await _toBlob(thumb, "image/webp", 0.85);
-    return { mainBlob, thumbBlob, width: o.size, height: o.size };
+    return cut;
   }
 
-  return { processImage, _contentBounds, _fitBox, _compose };
+  // The fast half: drop the cut-out onto the white square and encode. Cheap
+  // enough to re-run on every edit, which is what keeps stage 2 instant.
+  async function compose(cut, opts = {}) {
+    const o = { ...DEFAULTS, ...opts };
+    const main = _compose(cut, o.size, o.pad, o.bg);
+    const thumb = _resize(main, o.thumb);
+    return {
+      mainBlob: await _toBlob(main, "image/webp", 0.9),
+      thumbBlob: await _toBlob(thumb, "image/webp", 0.85),
+      width: o.size, height: o.size,
+      preview: main,
+    };
+  }
+
+  // Kept for callers that want the whole thing in one go.
+  async function processImage(file, opts = {}, removeBg) {
+    return compose(await cutout(file, removeBg), opts);
+  }
+
+  return { processImage, cutout, compose, _contentBounds, _fitBox, _compose };
 })();
