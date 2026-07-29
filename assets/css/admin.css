@@ -61,3 +61,10 @@
 .staff__code { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
 .staff__code input { flex: 1; min-width: 220px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 10px 12px; font-family: var(--font-mono); font-size: 14px; }
 .staff__code input:focus { outline: none; border-color: var(--ink); }
+
+/* Diagnostics panel (staff-facing troubleshooting) */
+.diag { position: fixed; right: 10px; bottom: 10px; z-index: 90; text-align: right; }
+.diag__toggle { background: var(--ink); color: #fff; border: 0; border-radius: 999px; padding: 8px 14px; font-family: var(--font-mono); font-size: 11px; opacity: .55; }
+.diag__toggle:hover { opacity: 1; }
+#diag-panel { background: #fff; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 10px; margin-top: 8px; width: min(92vw, 460px); text-align: left; box-shadow: 0 10px 30px rgba(28,26,23,.18); }
+#diag-body { font-family: var(--font-mono); font-size: 11px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; max-height: 45vh; overflow: auto; margin-bottom: 8px; }

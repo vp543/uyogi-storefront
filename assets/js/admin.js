@@ -6,6 +6,47 @@ const show = (el, on) => { if (el) el.hidden = !on; };
 
 const state = { products: [], haspic: new Set(), q: "", needsOnly: true, me: null, staff: [] };
 
+// ── Diagnostics ────────────────────────────────────────────────────────
+// Kept in localStorage on purpose: if the phone reloads the page while the
+// camera is open, an in-memory log would vanish along with the evidence.
+// Staff can read it via the "Diagnostics" link and send a screenshot.
+const LOGKEY = "uyogi.diag";
+function diag(msg) {
+  try {
+    const l = JSON.parse(localStorage.getItem(LOGKEY) || "[]");
+    l.push(new Date().toISOString().slice(11, 19) + "  " + msg);
+    localStorage.setItem(LOGKEY, JSON.stringify(l.slice(-60)));
+  } catch (_) { /* private mode / quota — diagnostics are optional */ }
+  if ($("diag-body")) renderDiag();
+}
+function diagList() {
+  try { return JSON.parse(localStorage.getItem(LOGKEY) || "[]"); } catch (_) { return []; }
+}
+function renderDiag() {
+  const b = $("diag-body");
+  if (b) b.textContent = diagList().join("\n") || "(nothing logged yet)";
+}
+window.addEventListener("error", (e) => diag("JS ERROR: " + e.message));
+window.addEventListener("unhandledrejection", (e) => diag("PROMISE REJECTED: " + (e.reason && e.reason.message || e.reason)));
+document.addEventListener("visibilitychange", () => diag("page " + document.visibilityState));
+diag("--- page loaded (" + (navigator.userAgent.match(/Android|iPhone|iPad/) || ["desktop"])[0] + ") ---");
+
+// Diagnostics panel wiring (works even when Supabase isn't configured).
+if ($("diag-toggle")) {
+  $("diag-toggle").addEventListener("click", () => {
+    const p = $("diag-panel");
+    p.hidden = !p.hidden;
+    if (!p.hidden) renderDiag();
+  });
+  $("diag-clear").addEventListener("click", () => {
+    localStorage.removeItem(LOGKEY); renderDiag();
+  });
+  $("diag-copy").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(diagList().join("\n")); $("diag-copy").textContent = "Copied"; }
+    catch (_) { $("diag-copy").textContent = "Select the text above"; }
+  });
+}
+
 // If the Supabase config is blank, show a friendly setup notice and stop.
 if (!SB.configured) {
   show($("setup"), true);
@@ -33,10 +74,17 @@ function initAuth() {
   });
   $("signout").addEventListener("click", () => SB.signOut());
 
-  // Fires immediately with the current session (v2 INITIAL_SESSION), then on changes.
+  // Fires immediately with the current session (v2 INITIAL_SESSION), then on
+  // changes — including token refreshes and tab-visibility recovery, which are
+  // NOT sign-ins. Re-rendering on those would destroy an open capture modal
+  // (and the photo on its way into it), so ignore events for the same user.
+  let shownFor = undefined;
   SB.onAuth(async (user) => {
+    diag("auth event: " + (user ? "user " + user.id.slice(0, 8) : "signed out"));
     renderAuthed(!!user);
-    if (!user) return;
+    if (!user) { shownFor = null; return; }
+    if (shownFor === user.id) { diag("  ignored (same user, already rendered)"); return; }
+    shownFor = user.id;
 
     $("app").innerHTML = `<p style="padding:24px">Checking your access…</p>`;
     try { state.me = await SB.myStaff(); } catch (_) { state.me = null; }
@@ -195,7 +243,10 @@ function openCapture(sku) {
   if (!p) return;
   const hadPhoto = state.haspic.has(sku);
 
-  $("app").insertAdjacentHTML("beforeend", `
+  diag("open capture: " + sku + (hadPhoto ? " (has photo)" : ""));
+  // Mounted on <body>, not inside #app: anything that re-renders the product
+  // list must not be able to tear the modal out from under an in-flight photo.
+  document.body.insertAdjacentHTML("beforeend", `
     <div class="cap" id="cap">
       <div class="cap__panel">
         <button class="cap__x" id="cap-x" aria-label="Close">✕</button>
@@ -241,21 +292,26 @@ function openCapture(sku) {
       <span>Tap to take a photo<br><small>or choose an image</small></span>
     </label>`;
     $("cap-file").addEventListener("change", onFile);
+    $("cap-file").addEventListener("click", () => diag("camera/picker opened"));
     renderActions();
   }
 
   async function onFile(e) {
+    diag("change fired, files=" + (e.target.files ? e.target.files.length : "none"));
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file) { diag("no file returned — aborted"); return; }
     originalFile = file;
+    diag("file received: " + Math.round(file.size / 1024) + " KB, " + (file.type || "unknown type"));
     setStatus("Cleaning up the photo… (first run downloads a small model)");
     stage.innerHTML = `<div class="cap__spin">Processing…</div>`;
     try {
       processed = await ImgPipeline.processImage(file);
+      diag("processed OK");
       stage.innerHTML = `<img class="cap__preview" src="${URL.createObjectURL(processed.mainBlob)}" alt="preview">`;
       setStatus("");
       renderActions();
     } catch (err) {
+      diag("PROCESSING FAILED: " + err.message);
       setStatus("Couldn't process that image. Try another. (" + err.message + ")");
       renderDrop();
     }

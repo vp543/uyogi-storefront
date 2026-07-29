@@ -40,6 +40,17 @@
 
   <main id="app" class="wrap" hidden></main>
 
+  <!-- Diagnostics: survives a page reload, so it still shows what happened if
+       the phone reloads the page while the camera is open. -->
+  <div class="diag">
+    <button id="diag-toggle" class="diag__toggle">Diagnostics</button>
+    <div id="diag-panel" hidden>
+      <pre id="diag-body"></pre>
+      <button id="diag-clear" class="btn btn--ghost">Clear</button>
+      <button id="diag-copy" class="btn btn--ghost">Copy</button>
+    </div>
+  </div>
+
   <script src="assets/js/config.js"></script>
   <script src="assets/js/icons.js"></script>
   <script src="assets/js/data.js"></script>
