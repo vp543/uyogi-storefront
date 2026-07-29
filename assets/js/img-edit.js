@@ -105,6 +105,12 @@ window.ImgEdit = (function () {
     const $ = (id) => container.querySelector("#" + id);
     const canvas = $("ed-canvas"), cropBox = $("ed-crop"), stage = $("ed-stage");
 
+    // Function declaration, not a const: redraw() fires onChange(getEdit())
+    // during mount, before a const further down would be initialised.
+    function getEdit() {
+      return { quarter: edit.quarter, angle: edit.angle, crop: edit.crop ? { ...edit.crop } : null };
+    }
+
     // Redraw the preview from the source, then place the crop overlay on top.
     function redraw() {
       rotated = applyEdit(source, { quarter: edit.quarter, angle: edit.angle, crop: null });
@@ -199,7 +205,6 @@ window.ImgEdit = (function () {
 
     redraw();
 
-    const getEdit = () => ({ quarter: edit.quarter, angle: edit.angle, crop: edit.crop ? { ...edit.crop } : null });
     return {
       getEdit,
       getResult: () => applyEdit(source, getEdit()),
