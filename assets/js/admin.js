@@ -95,7 +95,25 @@ function initAuth() {
     $("app").innerHTML = `<p style="padding:24px">Loading catalog…</p>`;
     await loadData();
     renderList();
+    reopenInterruptedCapture();
   });
+}
+
+// The phone can throw the page away while the camera app is in front. The photo
+// itself cannot survive that — the input it was headed for no longer exists — so
+// reopen the product and say plainly what happened instead of silently dropping
+// the employee back at the top of the list.
+function reopenInterruptedCapture() {
+  let sku = null;
+  try { sku = sessionStorage.getItem("uyogi.capture"); } catch (_) {}
+  if (!sku) return;
+  diag("reopening interrupted capture: " + sku);
+  openCapture(sku);
+  const s = $("cap-status");
+  if (s) {
+    s.textContent = "Your phone reloaded the page while the camera was open, so that photo was lost. Take it again — or tap “choose an image” and pick it from your gallery, which is more reliable.";
+    s.hidden = false;
+  }
 }
 
 // Shown to anyone signed in but not approved.
@@ -123,18 +141,24 @@ async function loadData() {
 
 function renderList() {
   const q = state.q.toLowerCase();
-  const items = state.products.filter((p) => {
+  const matches = state.products.filter((p) => {
     if (state.needsOnly && state.haspic.has(p.id)) return false;
     if (!q) return true;
     return p.name.toLowerCase().includes(q) || (p.code || "").toLowerCase().includes(q);
-  }).slice(0, 200);
+  });
+  // Fewer rows on screen = less memory = less chance the phone discards the page
+  // while the camera app is open. Search reaches the rest of the catalogue.
+  const LIMIT = 60;
+  const items = matches.slice(0, LIMIT);
 
   $("app").innerHTML = `
     ${approvalsHTML()}
     <div class="admin__tools">
       <input id="q" class="admin__search" type="search" placeholder="Search product or code…" value="${state.q.replace(/"/g, "&quot;")}">
       <label class="chk"><input type="checkbox" id="needs" ${state.needsOnly ? "checked" : ""}> Needs photo only</label>
-      <span class="admin__count">${items.length} shown · ${state.haspic.size} have photos</span>
+      <span class="admin__count">${matches.length > LIMIT
+        ? `first ${LIMIT} of ${matches.length} — search to narrow`
+        : `${matches.length} shown`} · ${state.haspic.size} have photos</span>
     </div>
     <div class="admin__grid">${items.map(rowHTML).join("") || `<p class="admin__empty">Nothing matches.</p>`}</div>`;
 
@@ -244,6 +268,10 @@ function openCapture(sku) {
   const hadPhoto = state.haspic.has(sku);
 
   diag("open capture: " + sku + (hadPhoto ? " (has photo)" : ""));
+  // Remember which product is open. Phones routinely discard the page while the
+  // camera app is in front; on reload we reopen here instead of dumping the
+  // employee back at the top of a 1,800-item list with no explanation.
+  try { sessionStorage.setItem("uyogi.capture", sku); } catch (_) {}
   // Mounted on <body>, not inside #app: anything that re-renders the product
   // list must not be able to tear the modal out from under an in-flight photo.
   document.body.insertAdjacentHTML("beforeend", `
@@ -261,7 +289,10 @@ function openCapture(sku) {
   let processed = null, originalFile = null;
   const stage = $("cap-stage"), status = $("cap-status"), actions = $("cap-actions");
   const setStatus = (m) => { status.textContent = m; status.hidden = !m; };
-  const close = () => { const c = $("cap"); if (c) c.remove(); };
+  const close = () => {
+    try { sessionStorage.removeItem("uyogi.capture"); } catch (_) {}
+    const c = $("cap"); if (c) c.remove();
+  };
 
   function renderActions() {
     const removeBtn = hadPhoto ? `<button class="btn btn--ghost" id="cap-remove" style="margin-right:auto">Remove photo</button>` : "";
@@ -287,12 +318,22 @@ function openCapture(sku) {
   function renderDrop() {
     processed = null;
     setStatus("");
-    stage.innerHTML = `<label class="cap__drop" id="cap-drop">
-      <input id="cap-file" type="file" accept="image/*" capture="environment" hidden>
-      <span>Tap to take a photo<br><small>or choose an image</small></span>
-    </label>`;
-    $("cap-file").addEventListener("change", onFile);
-    $("cap-file").addEventListener("click", () => diag("camera/picker opened"));
+    // Two separate inputs on purpose. `capture` sends Android straight to the
+    // camera app with no gallery option, and that hand-off is what makes the
+    // phone discard the page — so offer a gallery route that skips it.
+    stage.innerHTML = `
+      <label class="cap__drop" id="cap-drop">
+        <input id="cap-file" type="file" accept="image/*" capture="environment" hidden>
+        <span>Tap to take a photo</span>
+      </label>
+      <label class="cap__alt" id="cap-alt-label">
+        <input id="cap-file-alt" type="file" accept="image/*" hidden>
+        <span>Choose from gallery</span>
+      </label>`;
+    for (const id of ["cap-file", "cap-file-alt"]) {
+      $(id).addEventListener("change", onFile);
+      $(id).addEventListener("click", () => diag(id === "cap-file" ? "camera opened" : "gallery picker opened"));
+    }
     renderActions();
   }
 
