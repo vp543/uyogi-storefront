@@ -265,6 +265,10 @@ function rowHTML(p) {
 function openCapture(sku) {
   const p = state.products.find((x) => x.id === sku);
   if (!p) return;
+  // Never stack modals: reopening after a reload and a tap on the list can
+  // otherwise both fire, leaving a dead modal underneath the live one.
+  const existing = document.getElementById("cap");
+  if (existing) existing.remove();
   const hadPhoto = state.haspic.has(sku);
 
   diag("open capture: " + sku + (hadPhoto ? " (has photo)" : ""));
