@@ -99,11 +99,13 @@ window.UI = (function () {
     const el = document.getElementById("site-footer");
     if (!el) return;
     const c = CFG.company;
+    const tel = (n) => `<a href="tel:${esc(n.replace(/\s/g, ""))}">${esc(n)}</a>`;
     const contactRows = [
+      c.phone ? tel(c.phone) : "",
+      c.phone2 ? tel(c.phone2) : "",
+      c.whatsapp ? `<a href="https://wa.me/${esc(c.whatsapp)}" target="_blank" rel="noopener">Chat on WhatsApp</a>` : "",
       `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`,
-      c.phone ? `<a href="tel:${esc(c.phone.replace(/\s/g, ""))}">${esc(c.phone)}</a>` : "",
-      c.whatsapp ? `<a href="https://wa.me/${esc(c.whatsapp)}" target="_blank" rel="noopener">WhatsApp</a>` : "",
-      c.address ? `<span>${esc(c.address)}</span>` : "",
+      c.instagram ? `<a href="${esc(c.instagram)}" target="_blank" rel="noopener">Instagram</a>` : "",
     ].filter(Boolean).join("");
     el.innerHTML = `
       <div class="wrap footer__inner">
@@ -118,8 +120,9 @@ window.UI = (function () {
         <div class="footer__col">
           <h4>Visit</h4>
           <div class="footer__links">
-            <span>${esc(c.shopName || "Main Shop")}${c.address ? ` — ${esc(c.address)}` : ""}</span>
-            <span>Kigali, Rwanda</span>
+            <span>${esc(c.shopName || "Main Shop")} · Kigali, Rwanda</span>
+            ${c.address ? `<span>${esc(c.address)}</span>` : ""}
+            ${c.hours ? `<span>${esc(c.hours)}</span>` : ""}
             <span>Delivery across Kigali</span>
           </div>
         </div>
@@ -134,7 +137,7 @@ window.UI = (function () {
       </div>
       <div class="wrap footer__base">
         <span>© ${new Date().getFullYear()} ${esc(c.name)} · Kigali, Rwanda</span>
-        <span>Prices on request · Delivery citywide</span>
+        <span>Prices on request${c.payment ? ` · ${esc(c.payment)}` : ""} · Delivery citywide</span>
       </div>`;
   }
 

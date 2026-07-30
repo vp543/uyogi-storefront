@@ -6,11 +6,16 @@ window.UYOGI_CONFIG = {
     brand: "UYOGI",
     tagline: "Stocking IT, electronics & home goods across Kigali.",
     email: "yis.kigali@gmail.com",
-    // Fill these in when ready — they show on the site automatically.
-    phone: "",          // e.g. "+250 7XX XXX XXX"
-    whatsapp: "",       // digits only, e.g. "2507XXXXXXXX"
+    // Confirmed by the owner 2026-07-29 (see docs/owner-answers-2026-07-29.md).
+    phone: "+250 781 999 999",
+    phone2: "+250 788 397 777",     // second line; omit or blank to hide
+    whatsapp: "250781999999",       // digits only — the first number
     shopName: "Main Shop",
-    address: "",        // e.g. "KN 4 Ave, Kigali" — shown next to the shop name
+    // Landmark-based, which is how addresses work in Kigali.
+    address: "Sulfo Road (KN 82 St), Town — opposite T-2000 Supermarket, next to Papeterie Very Clear",
+    hours: "Mon–Sat 9:00–19:00 · Closed Sunday",
+    instagram: "https://www.instagram.com/yogikigali/",
+    payment: "Cash & MoMo",         // what the shop accepts; no online payment
     // UYOGI has ONE customer-facing shop in Kigali; stock is held behind it and
     // delivered citywide. (Warehouses aren't shopfronts, so we don't list them.)
     locations: ["Main Shop, Kigali"],
