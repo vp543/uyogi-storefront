@@ -27,7 +27,7 @@ window.UYOGI_CONFIG = {
   // from Supabase → Project Settings → API (see docs/supabase-setup.md).
   supabase: {
     url: "https://gbdxqkxwfuxkotlxdnzf.supabase.co",
-    anonKey: "sb_publishable_VBzyeptVL9BJREglciz8nw_SHg766TR",   // publishable key (safe to expose; RLS protects the data)
+    anonKey: "sb_publishable_zobdpnCEEICLvnNf6zB-_w_fw32Ou1b",   // publishable key (safe to expose; RLS protects the data)
   },
   photos: {
     bucket: "product-photos",   // public bucket holding <sku>/main.webp + thumb.webp
