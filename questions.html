@@ -253,7 +253,37 @@
       </section>
 
       <section class="qz__sec">
-        <h2>6. About the business</h2>
+        <h2>6. Locations (for the stock system)</h2>
+        <p class="sub">StockHub tracks stock per location. It was set up with placeholder names
+          — <em>Main Warehouse</em>, <em>Downtown Store</em> — which need to become your real ones
+          before you start counting stock.</p>
+
+        <div class="qz__q">
+          <label for="q-shop">What is the customer-facing shop called? <span class="req">*</span>
+            <span class="hint">The one place customers actually visit. Exactly as you'd write it on a receipt.</span></label>
+          <input id="q-shop" type="text" placeholder="e.g. UYOGI Main Shop, Kigali">
+        </div>
+        <div class="qz__q">
+          <label for="q-warehouses">Which storage places hold stock? <span class="req">*</span>
+            <span class="hint">One per line. From the stock file these look like: Shop Godown, Muhima,
+              Anik, Kimihurura, Rwamagana. Delete any you don't use, add any missing.</span></label>
+          <textarea id="q-warehouses" placeholder="Shop Godown&#10;Muhima&#10;Anik&#10;Kimihurura&#10;Rwamagana"></textarea>
+        </div>
+        <div class="qz__q">
+          <fieldset>
+            <legend>Do you want stock counted separately at each of those?
+              <span class="hint">Separate = you always know what is where, but every place must be counted.
+                Combined = one total for the whole business, much less work.</span></legend>
+            <div class="qz__opts" data-single="q-loctrack">
+              <label class="qz__opt"><input type="radio" name="loctrack" value="Separate per location"> Separate per location</label>
+              <label class="qz__opt"><input type="radio" name="loctrack" value="One combined total"> One combined total</label>
+            </div>
+          </fieldset>
+        </div>
+      </section>
+
+      <section class="qz__sec">
+        <h2>7. About the business</h2>
         <p class="sub">The About page is thin. A few real facts make the site far more convincing to a first-time customer.</p>
 
         <div class="qz__q">
