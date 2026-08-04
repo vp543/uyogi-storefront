@@ -69,6 +69,45 @@ export const SB = {
     const { data, error } = await client.from("product_photos").select("sku,image_path,thumb_path,status");
     if (error) throw error; return data || [];
   },
+  // ── Photo candidates ─────────────────────────────────────────────────
+  // Every photo uploaded for a product. product_photos.candidate_id says
+  // which one is live; nothing here decides that.
+  async listCandidates(sku) {
+    const { data, error } = await client.from("product_photo_candidates")
+      .select("*").eq("sku", sku).order("uploaded_at", { ascending: true });
+    if (error) throw error; return data || [];
+  },
+  // One entry per candidate row — the caller tallies them into per-SKU
+  // counts for the list badges.
+  async allCandidateSkus() {
+    const { data, error } = await client.from("product_photo_candidates").select("sku");
+    if (error) throw error; return (data || []).map((r) => r.sku);
+  },
+  // Returns the stored row so the caller has the id the database accepted.
+  // Throws if the 4-photo cap trigger rejects the insert.
+  async insertCandidate(row) {
+    const { data, error } = await client.from("product_photo_candidates")
+      .insert(row).select().single();
+    if (error) throw error; return data;
+  },
+  async deleteCandidate(id) {
+    const { error } = await client.from("product_photo_candidates").delete().eq("id", id);
+    if (error) throw error;
+  },
+  // Called when a candidate stops being live: its raw original is deleted.
+  async clearCandidateRaw(id) {
+    const { error } = await client.from("product_photo_candidates")
+      .update({ raw_path: null }).eq("id", id);
+    if (error) throw error;
+  },
+  // The live-photo row for one product, or null. Used to confirm writes:
+  // PostgREST returns 204 on an update RLS filtered to zero rows, so a
+  // re-read is the only proof anything changed.
+  async getPhoto(sku) {
+    const { data, error } = await client.from("product_photos")
+      .select("*").eq("sku", sku).maybeSingle();
+    if (error) throw error; return data;
+  },
   async uploadImage(bucket, path, blob) {
     const { error } = await client.storage.from(bucket).upload(path, blob, { upsert: true, contentType: blob.type });
     if (error) throw error;
