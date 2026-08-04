@@ -431,15 +431,26 @@ function openCapture(sku) {
         uploaded_by: c.uploaded_by, uploaded_at: c.uploaded_at,
       });
       await confirmLive(c.id);
-      await retireRaw(previousLive, c.id);
-      diag("published candidate " + c.id.slice(0, 8) + " for " + sku);
-      state.haspic.add(sku);
-      await renderCandidates();
-      setStatus("Done — that photo is on the website now.");
     } catch (err) {
+      // Nothing changed on the website — this is the only case that is
+      // honestly a failure of the swap itself.
       diag("SWAP FAILED: " + err.message);
       setStatus("Couldn't change the photo: " + err.message);
+      return;
     }
+    diag("published candidate " + c.id.slice(0, 8) + " for " + sku);
+    state.haspic.add(sku);
+    // From here the swap is done and confirmed live. Retiring the old raw
+    // original is housekeeping that happens afterwards — its failure must
+    // not be reported as though the swap failed, and must not stop the
+    // strip from re-rendering to what is now actually true.
+    try {
+      await retireRaw(previousLive, c.id);
+    } catch (err) {
+      diag("raw retire failed (ignored): " + err.message);
+    }
+    await renderCandidates();
+    setStatus("Done — that photo is on the website now.");
   }
 
   // Files first, then the row: an orphaned row is recoverable and an orphaned

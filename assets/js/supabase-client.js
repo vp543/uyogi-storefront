@@ -95,10 +95,22 @@ export const SB = {
     if (error) throw error;
   },
   // Called when a candidate stops being live: its raw original is deleted.
+  // PostgREST answers 204 on an UPDATE that RLS filtered to zero rows —
+  // success-shaped, but nothing happened — so this re-reads the column and
+  // throws unless it is actually null. Without that, a row could keep
+  // claiming a raw file that removeImage already deleted from storage.
   async clearCandidateRaw(id) {
     const { error } = await client.from("product_photo_candidates")
       .update({ raw_path: null }).eq("id", id);
     if (error) throw error;
+    const { data, error: selErr } = await client.from("product_photo_candidates")
+      .select("raw_path").eq("id", id).maybeSingle();
+    if (selErr) throw selErr;
+    // A missing row (already deleted) can't claim a stale file either way —
+    // only a row that still exists AND still has a raw_path is the problem.
+    if (data && data.raw_path !== null) {
+      throw new Error("raw_path didn't clear — you may not have permission to change this candidate");
+    }
   },
   // The live-photo row for one product, or null. Used to confirm writes:
   // PostgREST returns 204 on an update RLS filtered to zero rows, so a
@@ -112,7 +124,14 @@ export const SB = {
     const { error } = await client.storage.from(bucket).upload(path, blob, { upsert: true, contentType: blob.type });
     if (error) throw error;
   },
-  async removeImage(bucket, path) { await client.storage.from(bucket).remove([path]); },
+  // Throws like every other method here — a caller that wants a missing or
+  // failed delete to be non-fatal (a raw original that's legitimately
+  // absent, a best-effort cleanup pass) must catch and diag() it themselves,
+  // so that tolerance is visible at the call site instead of hidden in here.
+  async removeImage(bucket, path) {
+    const { error } = await client.storage.from(bucket).remove([path]);
+    if (error) throw error;
+  },
   // Public URL of a stored object. Cache-busted by callers after a replace,
   // since replacing a photo reuses the same path.
   publicUrl(bucket, path) { return `${C.url}/storage/v1/object/public/${bucket}/${path}`; },
