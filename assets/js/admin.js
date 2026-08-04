@@ -4,7 +4,7 @@ import { SB } from "./supabase-client.js";
 const $ = (id) => document.getElementById(id);
 const show = (el, on) => { if (el) el.hidden = !on; };
 
-const state = { products: [], haspic: new Set(), q: "", needsOnly: true, me: null, staff: [] };
+const state = { products: [], haspic: new Set(), candCount: new Map(), q: "", needsOnly: true, me: null, staff: [] };
 
 // ── Diagnostics ────────────────────────────────────────────────────────
 // Kept in localStorage on purpose: if the phone reloads the page while the
@@ -140,6 +140,11 @@ async function loadData() {
   state.products = data.products;
   const rows = await SB.listPhotos();
   state.haspic = new Set(rows.filter((r) => r.status === "active").map((r) => r.sku));
+  // Per-SKU candidate counts drive the list badge. One row per photo, so a
+  // tally client-side is cheaper than a grouped query for this data size.
+  const counts = new Map();
+  for (const s of await SB.allCandidateSkus()) counts.set(s, (counts.get(s) || 0) + 1);
+  state.candCount = counts;
   state.staff = state.me.role === "owner" ? await SB.listStaff() : [];
   if (state.me.role === "owner") {
     try { state.code = await SB.getAccessCode(); } catch (_) { state.code = null; }
@@ -276,7 +281,11 @@ function openCapture(sku) {
   // otherwise both fire, leaving a dead modal underneath the live one.
   const existing = document.getElementById("cap");
   if (existing) existing.remove();
-  const hadPhoto = state.haspic.has(sku);
+  // `let`, not `const`: publishing the first photo flips it, and renderActions
+  // reads it to decide whether to offer "Add another photo" and "Remove photo".
+  // Leaving it const would strand staff on a screen with neither button after
+  // their first upload.
+  let hadPhoto = (state.candCount.get(sku) || 0) > 0;
 
   diag("open capture: " + sku + (hadPhoto ? " (has photo)" : ""));
   // Remember which product is open. Phones routinely discard the page while the
@@ -299,6 +308,7 @@ function openCapture(sku) {
     </div>`);
 
   let processed = null, originalFile = null;
+  let candidates = [], livePhoto = null;   // this product's photos, and which is live
   let cut = null;        // transparent cut-out, kept so stage 2 never re-runs the model
   let editor = null;     // live ImgEdit instance, if a stage is showing one
   const stage = $("cap-stage"), status = $("cap-status"), actions = $("cap-actions");
@@ -311,31 +321,87 @@ function openCapture(sku) {
   };
 
   function renderActions() {
-    const removeBtn = hadPhoto ? `<button class="btn btn--ghost" id="cap-remove" style="margin-right:auto">Remove photo</button>` : "";
-    const publishBtns = processed
-      ? `<button class="btn btn--ghost" id="cap-retake">Retake</button>
-         <button class="btn btn--primary" id="cap-publish">Publish photo</button>`
-      // Showing the existing photo: offer a way back to the capture screen.
-      : (hadPhoto ? `<button class="btn btn--primary" id="cap-replace">Replace photo</button>` : "");
-    actions.innerHTML = removeBtn + publishBtns;
-    actions.hidden = !(removeBtn || publishBtns);
+    const removeBtn = hadPhoto
+      ? `<button class="btn btn--ghost" id="cap-remove" style="margin-right:auto">Remove photo</button>` : "";
+    if (processed) {
+      actions.innerHTML = removeBtn +
+        `<button class="btn btn--ghost" id="cap-retake">Retake</button>
+         <button class="btn btn--primary" id="cap-publish">Publish photo</button>`;
+      actions.hidden = false;
+      return;
+    }
+    // Showing the strip: offer another photo unless the product is at the cap.
+    const room = PhotoCandidates.canAdd(candidates);
+    const addBtn = hadPhoto
+      ? (room
+        ? `<button class="btn btn--primary" id="cap-replace">Add another photo</button>`
+        : `<button class="btn btn--primary" id="cap-replace" disabled
+             title="This product already has ${PhotoCandidates.MAX_CANDIDATES} photos. Delete one first.">Add another photo</button>`)
+      : "";
+    actions.innerHTML = removeBtn + addBtn;
+    actions.hidden = !(removeBtn || addBtn);
   }
 
-  // The product already has a photo — show it, so staff can see what they
-  // are about to replace instead of an empty "take a photo" placeholder.
-  function renderCurrent() {
+  // The product's photos, oldest first, with the live one marked. Replaces the
+  // old single-photo view: staff can now compare attempts instead of judging
+  // one image from memory of the last.
+  async function renderCandidates() {
     processed = null;
-    setNote("");
+    killEditor();
     stage.classList.remove("is-editing");
-    const src = SB.publicUrl(SB.pubBucket, `${sku}/main.webp`) + `?t=${Date.now()}`;
-    stage.innerHTML = `<img class="cap__preview" src="${src}" alt="Current photo of ${esc(p.name)}">`;
-    setStatus("Current photo");
+    setNote("");
+    setStatus("Loading photos…");
+    try {
+      const [rows, photoRow] = await Promise.all([SB.listCandidates(sku), SB.getPhoto(sku)]);
+      candidates = PhotoCandidates.sortCandidates(rows);
+      livePhoto = photoRow;
+    } catch (err) {
+      diag("CANDIDATE LOAD FAILED: " + err.message);
+      setStatus("Couldn't load this product's photos: " + err.message);
+      return;
+    }
+    if (!candidates.length) return renderDrop();
+
+    const live = PhotoCandidates.findLive(candidates, livePhoto);
+    stage.classList.add("is-strip");
+    stage.innerHTML = `<div class="cand__grid">${candidates.map((c, i) => {
+      const on = live && c.id === live.id;
+      return `
+        <figure class="cand ${on ? "is-live" : ""}">
+          <img class="cand__img" src="${esc(SB.publicUrl(SB.pubBucket, c.thumb_path || c.image_path))}"
+               alt="Photo ${i + 1} of ${esc(p.name)}" data-zoom="${esc(c.id)}">
+          <figcaption class="cand__cap">${on ? "● On site" : `Photo ${i + 1}`}</figcaption>
+          <span class="cand__acts">
+            ${on ? "" : `<button class="btn btn--ghost" data-use="${esc(c.id)}">Use this</button>`}
+            <button class="btn btn--ghost cand__del" data-del="${esc(c.id)}"
+              ${on ? `disabled title="This photo is on the website. Choose another one first."` : ""}>Delete</button>
+          </span>
+        </figure>`;
+    }).join("")}</div>`;
+
+    setStatus(live
+      ? `${candidates.length} of 4 photos. The one marked “On site” is what customers see.`
+      : `${candidates.length} of 4 photos. None is on the website yet — choose one.`);
+    stage.querySelectorAll("[data-zoom]").forEach((el) =>
+      el.addEventListener("click", () => zoom(el.getAttribute("data-zoom"))));
     renderActions();
+  }
+
+  // A phone thumbnail is too small to judge a photo by. Show one full size,
+  // with a way back to the strip.
+  function zoom(id) {
+    const c = candidates.find((x) => x.id === id);
+    if (!c) return;
+    stage.classList.remove("is-strip");
+    stage.innerHTML = `<img class="cap__preview" src="${esc(SB.publicUrl(SB.pubBucket, c.image_path))}" alt="Full size photo">`;
+    setStatus("Tap “Back to photos” to return.");
+    actions.innerHTML = `<button class="btn btn--primary" id="cap-back">Back to photos</button>`;
+    actions.hidden = false;
   }
 
   function renderDrop() {
     processed = null;
-    stage.classList.remove("is-editing");
+    stage.classList.remove("is-editing", "is-strip");
     setStatus("");
     // Two separate inputs on purpose. `capture` sends Android straight to the
     // camera app with no gallery option, and that hand-off is what makes the
@@ -525,7 +591,8 @@ function openCapture(sku) {
   }
 
   actions.addEventListener("click", (e) => {
-    if (e.target.id === "cap-retake") { killEditor(); hadPhoto ? renderCurrent() : renderDrop(); }
+    if (e.target.id === "cap-retake") { killEditor(); hadPhoto ? renderCandidates() : renderDrop(); }
+    else if (e.target.id === "cap-back") renderCandidates();
     else if (e.target.id === "cap-replace") renderDrop();
     else if (e.target.id === "cap-continue") runCutout();
     else if (e.target.id === "cap-publish") publish();
@@ -533,5 +600,5 @@ function openCapture(sku) {
   });
   $("cap-x").addEventListener("click", close);
 
-  hadPhoto ? renderCurrent() : renderDrop();
+  hadPhoto ? renderCandidates() : renderDrop();
 }

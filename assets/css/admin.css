@@ -110,3 +110,17 @@
 /* While an editor is mounted the stage must not be a fixed square with hidden
    overflow, or the rotate buttons and slider get clipped out of sight. */
 .cap__stage.is-editing { aspect-ratio: auto; overflow: visible; display: block; background: none; border: 0; padding: 0; }
+
+/* ── Photo candidates ─────────────────────────────────────────────────── */
+/* The stage is a fixed 1:1 box with overflow:hidden — the strip needs to
+   grow instead, the same reason .is-editing exists. */
+.cap__stage.is-strip { aspect-ratio: auto; overflow: visible; display: block; background: none; border: 0; }
+.cand__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+.cand { margin: 0; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px; background: #fff; display: flex; flex-direction: column; gap: 6px; }
+.cand.is-live { border-color: var(--stock); box-shadow: 0 0 0 1px var(--stock); }
+.cand__img { width: 100%; aspect-ratio: 1; object-fit: contain; background: var(--paper-2); border-radius: 4px; cursor: zoom-in; display: block; }
+.cand__cap { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--steel); }
+.cand.is-live .cand__cap { color: var(--stock); font-weight: 700; }
+.cand__acts { display: flex; flex-direction: column; gap: 4px; }
+.cand__acts .btn { padding: 6px 8px; font-size: 12px; }
+.cand__acts .btn[disabled] { opacity: .4; cursor: not-allowed; }
