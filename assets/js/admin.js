@@ -388,7 +388,86 @@ function openCapture(sku) {
       : `${candidates.length} of 4 photos. None is on the website yet — choose one.`);
     stage.querySelectorAll("[data-zoom]").forEach((el) =>
       el.addEventListener("click", () => zoom(el.getAttribute("data-zoom"))));
+    stage.querySelectorAll("[data-use]").forEach((b) =>
+      b.addEventListener("click", () => useCandidate(b.getAttribute("data-use"))));
+    stage.querySelectorAll("[data-del]").forEach((b) =>
+      b.addEventListener("click", () => removeCandidate(b.getAttribute("data-del"))));
     renderActions();
+  }
+
+  // PostgREST answers 204 to an UPDATE that RLS filtered to zero rows: it
+  // looks like success and nothing happened. Re-read, every time.
+  async function confirmLive(id) {
+    const row = await SB.getPhoto(sku);
+    if (!row || row.candidate_id !== id) {
+      throw new Error("that didn't save — you may not have permission to change this product");
+    }
+    livePhoto = row;
+  }
+
+  // Only the live photo keeps its raw original (2-5 MB against 150 KB for the
+  // finished image). Deleting the file is best-effort; clearing the column is
+  // not, so the row never claims a file that has gone.
+  async function retireRaw(previousLive, nextLiveId) {
+    const path = PhotoCandidates.staleRawPath(previousLive, nextLiveId);
+    if (!path) return;
+    try { await SB.removeImage(SB.rawBucket, path); }
+    catch (err) { diag("raw delete failed (ignored): " + err.message); }
+    await SB.clearCandidateRaw(previousLive.id);
+  }
+
+  // Put a different photo on the website. One UPDATE — no re-processing, no
+  // re-upload, no background-removal run.
+  async function useCandidate(id) {
+    const c = candidates.find((x) => x.id === id);
+    if (!c) return;
+    const previousLive = PhotoCandidates.findLive(candidates, livePhoto);
+    setStatus("Updating the website…");
+    try {
+      await SB.upsertPhoto({
+        sku, candidate_id: c.id,
+        image_path: c.image_path, thumb_path: c.thumb_path,
+        width: c.width, height: c.height, status: "active",
+        uploaded_by: c.uploaded_by, uploaded_at: c.uploaded_at,
+      });
+      await confirmLive(c.id);
+      await retireRaw(previousLive, c.id);
+      diag("published candidate " + c.id.slice(0, 8) + " for " + sku);
+      state.haspic.add(sku);
+      await renderCandidates();
+      setStatus("Done — that photo is on the website now.");
+    } catch (err) {
+      diag("SWAP FAILED: " + err.message);
+      setStatus("Couldn't change the photo: " + err.message);
+    }
+  }
+
+  // Files first, then the row: an orphaned row is recoverable and an orphaned
+  // file is visible nowhere. Deleting the live photo is refused here and
+  // again by the database (ON DELETE RESTRICT).
+  // Named removeCandidate, not deleteCandidate: SB.deleteCandidate is the raw
+  // row delete this wraps, and two same-named things one line apart is how
+  // the wrong one gets called during a later edit.
+  async function removeCandidate(id) {
+    const c = candidates.find((x) => x.id === id);
+    if (!c) return;
+    if (livePhoto && livePhoto.candidate_id === id) {
+      setStatus("That photo is on the website. Put another one on the website first, then delete it.");
+      return;
+    }
+    setStatus("Deleting…");
+    try {
+      await SB.removeImage(SB.pubBucket, c.image_path);
+      if (c.thumb_path) await SB.removeImage(SB.pubBucket, c.thumb_path);
+      if (c.raw_path) await SB.removeImage(SB.rawBucket, c.raw_path);
+      await SB.deleteCandidate(c.id);
+      state.candCount.set(sku, Math.max(0, (state.candCount.get(sku) || 1) - 1));
+      diag("deleted candidate " + c.id.slice(0, 8));
+      await renderCandidates();
+    } catch (err) {
+      diag("CANDIDATE DELETE FAILED: " + err.message);
+      setStatus("Couldn't delete that photo: " + err.message);
+    }
   }
 
   // A phone thumbnail is too small to judge a photo by. Show one full size,
@@ -586,10 +665,19 @@ function openCapture(sku) {
     if (!confirm("Remove this product's photo?")) return;
     setStatus("Removing…");
     try {
-      await SB.removeImage(SB.pubBucket, `${sku}/main.webp`);
-      await SB.removeImage(SB.pubBucket, `${sku}/thumb.webp`);
+      // The product_photos row references a candidate (ON DELETE RESTRICT),
+      // so it has to be cleared first or every candidate delete fails.
       await SB.deletePhoto(sku);
+      for (const c of candidates) {
+        try {
+          await SB.removeImage(SB.pubBucket, c.image_path);
+          if (c.thumb_path) await SB.removeImage(SB.pubBucket, c.thumb_path);
+          if (c.raw_path) await SB.removeImage(SB.rawBucket, c.raw_path);
+        } catch (err) { diag("file delete failed (ignored): " + err.message); }
+        await SB.deleteCandidate(c.id);
+      }
       state.haspic.delete(sku);
+      state.candCount.delete(sku);
       close(); renderList();
     } catch (err) { setStatus("Remove failed: " + err.message); }
   }
