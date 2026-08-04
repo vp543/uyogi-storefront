@@ -357,7 +357,11 @@ function openCapture(sku) {
       livePhoto = photoRow;
     } catch (err) {
       diag("CANDIDATE LOAD FAILED: " + err.message);
-      setStatus("Couldn't load this product's photos: " + err.message);
+      setStatus("Couldn't load this product's photos: " + err.message + ". Try closing and reopening this product.");
+      // processed is already null (set above), so renderActions offers only
+      // Remove/Add-another — never Retake/Publish left stranded from the
+      // previous screen with nothing behind them to publish.
+      renderActions();
       return;
     }
     if (!candidates.length) return renderDrop();
