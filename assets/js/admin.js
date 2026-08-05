@@ -657,19 +657,96 @@ function openCapture(sku) {
   async function publish() {
     if (!processed) return;
     setStatus("Publishing…");
+    const id = PhotoCandidates.newId();
+    const paths = PhotoCandidates.candidatePaths(sku, id);
+    const previousLive = PhotoCandidates.findLive(candidates, livePhoto);
+    const uploaded = [];                      // for rollback if the row write fails
+    let insertedCandidateId = null;           // ditto — an orphan row renders as a broken image
+    let published = false;                    // set once the photo is genuinely live
     try {
       const user = await SB.user();
-      await SB.uploadImage(SB.pubBucket, `${sku}/main.webp`, processed.mainBlob);
-      await SB.uploadImage(SB.pubBucket, `${sku}/thumb.webp`, processed.thumbBlob);
-      if (originalFile) { try { await SB.uploadImage(SB.rawBucket, `${sku}/original`, originalFile); } catch (_) {} }
+      await SB.uploadImage(SB.pubBucket, paths.image, processed.mainBlob);
+      uploaded.push([SB.pubBucket, paths.image]);
+      await SB.uploadImage(SB.pubBucket, paths.thumb, processed.thumbBlob);
+      uploaded.push([SB.pubBucket, paths.thumb]);
+
+      // The raw original has always been best-effort — a failure here must not
+      // cost the employee the photo they just took.
+      let rawPath = null;
+      if (originalFile) {
+        try {
+          await SB.uploadImage(SB.rawBucket, paths.raw, originalFile);
+          rawPath = paths.raw;
+          uploaded.push([SB.rawBucket, paths.raw]);
+        } catch (err) { diag("raw upload failed (ignored): " + err.message); }
+      }
+
+      const cand = await SB.insertCandidate({
+        id, sku, image_path: paths.image, thumb_path: paths.thumb, raw_path: rawPath,
+        width: processed.width, height: processed.height, uploaded_by: user?.id,
+      });
+      insertedCandidateId = cand.id;   // roll this back too if the next write fails
       await SB.upsertPhoto({
-        sku, image_path: `${sku}/main.webp`, thumb_path: `${sku}/thumb.webp`,
+        sku, candidate_id: cand.id,
+        image_path: paths.image, thumb_path: paths.thumb,
         width: processed.width, height: processed.height, status: "active",
         uploaded_by: user?.id, uploaded_at: new Date().toISOString(),
       });
+      await confirmLive(cand.id);
+      // Past this line the photo IS on the website. Nothing after it may be
+      // rolled back, and nothing after it may report failure to the user.
+      published = true;
+
+      // Retiring the old raw is housekeeping, not part of the user's action.
+      // If it fails, the publish still succeeded — saying otherwise would be
+      // a lie, and rolling back would delete the photo that just went live.
+      try { await retireRaw(previousLive, cand.id); }
+      catch (e) { diag("raw retirement failed (publish still succeeded): " + e.message); }
+
+      diag("published new candidate " + cand.id.slice(0, 8) + " for " + sku);
       state.haspic.add(sku);
-      close(); renderList();
-    } catch (err) { setStatus("Publish failed: " + err.message); }
+      state.candCount.set(sku, (state.candCount.get(sku) || 0) + 1);
+      hadPhoto = true;          // the strip, not the camera, is now the home screen
+      processed = null;
+      await renderCandidates();
+      renderList();
+      setStatus("Saved — this photo is on the website now.");
+    } catch (err) {
+      diag("PUBLISH FAILED: " + err.message);
+      // If the photo already went live, this is NOT a failed publish — it is a
+      // failure in the bookkeeping after it. Rolling back here would delete the
+      // files the storefront is now serving, and the candidate row delete would
+      // fail anyway because ON DELETE RESTRICT protects the live photo. Tell
+      // the truth and stop.
+      if (published) {
+        setStatus("Saved — this photo is on the website now.");
+        state.haspic.add(sku);
+        state.candCount.set(sku, (state.candCount.get(sku) || 0) + 1);
+        hadPhoto = true;
+        processed = null;
+        try { await renderCandidates(); renderList(); } catch (_) {}
+        return;
+      }
+      // Don't leave files behind eating the storage quota when the row write
+      // failed — and say so plainly if the cleanup itself failed.
+      let cleaned = true;
+      // The candidate row goes first. If insertCandidate succeeded and
+      // upsertPhoto then failed, the row survives pointing at files this
+      // very loop is about to delete — a permanent broken image in the strip
+      // that nothing else ever cleans up. It cannot be the live photo (the
+      // write that would have made it live is the one that just failed), so
+      // the ON DELETE RESTRICT foreign key does not block this.
+      if (insertedCandidateId) {
+        try { await SB.deleteCandidate(insertedCandidateId); }
+        catch (e) { cleaned = false; diag("rollback failed for candidate row: " + e.message); }
+      }
+      for (const [bucket, path] of uploaded) {
+        try { await SB.removeImage(bucket, path); }
+        catch (e) { cleaned = false; diag("rollback failed for " + path + ": " + e.message); }
+      }
+      setStatus("Couldn't save that photo: " + err.message +
+        (cleaned ? "" : " (some uploaded files could not be cleaned up — tell the owner)"));
+    }
   }
 
   async function remove() {
