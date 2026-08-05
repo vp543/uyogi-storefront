@@ -127,7 +127,11 @@
 
 /* Capture screen: the four shooting rules share the fixed 1:1 stage with the
    camera button, so the stage becomes a centred column instead of a drop box. */
-.cap__stage.is-drop { display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 12px; }
+/* Like .is-editing and .is-strip, this screen releases the fixed 1:1 box. The
+   stage clips its overflow, and on a 320px phone the four rules wrap far
+   enough to be cut off inside a square — taking the camera button with them.
+   Content decides the height here; min-height only stops it looking cramped. */
+.cap__stage.is-drop { aspect-ratio: auto; overflow: visible; min-height: 200px; display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 12px; }
 .cap__rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 12.5px; color: var(--ink-800); text-align: left; }
 .cap__rules li { padding-left: 14px; position: relative; line-height: 1.35; }
 .cap__rules li::before { content: "•"; position: absolute; left: 0; color: var(--sun-deep); }
