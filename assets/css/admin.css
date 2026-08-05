@@ -136,3 +136,11 @@
 .cap__rules li { padding-left: 14px; position: relative; line-height: 1.35; }
 .cap__rules li::before { content: "•"; position: absolute; left: 0; color: var(--sun-deep); }
 .cap__stage.is-drop .cap__drop { height: auto; padding: 18px 0; border: 1px dashed var(--line-strong); border-radius: var(--radius-sm); }
+
+/* Photo progress filter. Sits on its own row under the search box so the
+   four segments can wrap on a narrow phone without squeezing the input. */
+.seg { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 0 16px; }
+.seg__btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; font: inherit; font-size: 13px; font-weight: 600; color: var(--steel); background: none; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap; }
+.seg__btn:hover { border-color: var(--ink); color: var(--ink); }
+.seg__btn.is-on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.seg__n { font-family: var(--font-mono); font-size: 11px; font-weight: 400; opacity: .75; }

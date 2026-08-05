@@ -4,7 +4,7 @@ import { SB } from "./supabase-client.js";
 const $ = (id) => document.getElementById(id);
 const show = (el, on) => { if (el) el.hidden = !on; };
 
-const state = { products: [], haspic: new Set(), candCount: new Map(), q: "", needsOnly: true, me: null, staff: [] };
+const state = { products: [], haspic: new Set(), candCount: new Map(), q: "", filter: "todo", me: null, staff: [] };
 
 // ── Diagnostics ────────────────────────────────────────────────────────
 // Kept in localStorage on purpose: if the phone reloads the page while the
@@ -153,29 +153,45 @@ async function loadData() {
 
 function renderList() {
   const q = state.q.toLowerCase();
-  const matches = state.products.filter((p) => {
-    if (state.needsOnly && state.haspic.has(p.id)) return false;
-    if (!q) return true;
-    return p.name.toLowerCase().includes(q) || (p.code || "").toLowerCase().includes(q);
-  });
+  const hit = (p) => !q || p.name.toLowerCase().includes(q) || (p.code || "").toLowerCase().includes(q);
+  const inMode = (p, mode) =>
+    PhotoCandidates.matchesFilter(mode, state.candCount.get(p.id) || 0, state.haspic.has(p.id));
+
+  // Counts cover the WHOLE catalogue, not the rows on screen, and are what
+  // answer "how far along are we". One pass, no round trip — both inputs are
+  // already in memory.
+  const totals = { all: 0, todo: 0, done: 0, review: 0 };
+  for (const p of state.products) {
+    for (const m of PhotoCandidates.FILTER_MODES) if (inMode(p, m)) totals[m]++;
+  }
+
+  const matches = state.products.filter((p) => inMode(p, state.filter) && hit(p));
   // Fewer rows on screen = less memory = less chance the phone discards the page
   // while the camera app is open. Search reaches the rest of the catalogue.
   const LIMIT = 60;
   const items = matches.slice(0, LIMIT);
 
+  const LABELS = { all: "All", todo: "Not done", done: "Done", review: "To review" };
+  const tabs = PhotoCandidates.FILTER_MODES.map((m) => `
+    <button class="seg__btn ${state.filter === m ? "is-on" : ""}" data-filter="${m}"
+            aria-pressed="${state.filter === m}">
+      ${LABELS[m]} <span class="seg__n">${totals[m]}</span>
+    </button>`).join("");
+
   $("app").innerHTML = `
     ${approvalsHTML()}
     <div class="admin__tools">
       <input id="q" class="admin__search" type="search" placeholder="Search product or code…" value="${state.q.replace(/"/g, "&quot;")}">
-      <label class="chk"><input type="checkbox" id="needs" ${state.needsOnly ? "checked" : ""}> Needs photo only</label>
       <span class="admin__count">${matches.length > LIMIT
         ? `first ${LIMIT} of ${matches.length} — search to narrow`
-        : `${matches.length} shown`} · ${state.haspic.size} have photos</span>
+        : `${matches.length} shown`}</span>
     </div>
+    <div class="seg" role="group" aria-label="Filter products by photo progress">${tabs}</div>
     <div class="admin__grid">${items.map(rowHTML).join("") || `<p class="admin__empty">Nothing matches.</p>`}</div>`;
 
   $("q").addEventListener("input", (e) => { state.q = e.target.value; renderList(); });
-  $("needs").addEventListener("change", (e) => { state.needsOnly = e.target.checked; renderList(); });
+  document.querySelectorAll("[data-filter]").forEach((b) =>
+    b.addEventListener("click", () => { state.filter = b.getAttribute("data-filter"); renderList(); }));
   document.querySelectorAll("[data-pick]").forEach((b) =>
     b.addEventListener("click", () => openCapture(b.getAttribute("data-pick"))));
   document.querySelectorAll("[data-decide]").forEach((b) =>
