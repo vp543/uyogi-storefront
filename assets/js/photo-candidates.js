@@ -57,8 +57,27 @@ window.PhotoCandidates = (function () {
     return n === 1 ? "1 photo" : `${n} photos`;
   }
 
+  // The product list's four views. Order is display order.
+  const FILTER_MODES = ["all", "todo", "done", "review"];
+
+  // Which products a given view shows. Membership overlaps on purpose: a
+  // product whose photo is live but which still has rejects sitting behind it
+  // is BOTH done (customers are covered) and to-review (a choice remains).
+  // An unrecognised mode shows everything — a stale value must never leave the
+  // owner staring at an empty list wondering what broke.
+  function matchesFilter(mode, photoCount, hasLive) {
+    const n = photoCount || 0;
+    if (mode === "todo") return n === 0;
+    if (mode === "done") return !!hasLive;
+    // Either there is a choice between photos, or photos exist and none of
+    // them is on the site yet.
+    if (mode === "review") return n > 1 || (n > 0 && !hasLive);
+    return true;
+  }
+
   return {
     MAX_CANDIDATES, newId, candidatePaths, canAdd,
     sortCandidates, isLive, findLive, staleRawPath, photoCountLabel,
+    FILTER_MODES, matchesFilter,
   };
 })();

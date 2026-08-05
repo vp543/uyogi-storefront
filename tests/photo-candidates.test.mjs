@@ -100,3 +100,56 @@ test("photoCountLabel reads naturally at 0, 1 and many", () => {
   assert.equal(PC.photoCountLabel(1), "1 photo");
   assert.equal(PC.photoCountLabel(3), "3 photos");
 });
+
+test("FILTER_MODES lists the four modes in display order", () => {
+  assert.deepEqual(PC.FILTER_MODES, ["all", "todo", "done", "review"]);
+});
+
+test("all matches every product", () => {
+  assert.equal(PC.matchesFilter("all", 0, false), true);
+  assert.equal(PC.matchesFilter("all", 1, true), true);
+  assert.equal(PC.matchesFilter("all", 3, true), true);
+});
+
+test("todo is products with no photos at all", () => {
+  assert.equal(PC.matchesFilter("todo", 0, false), true);
+  assert.equal(PC.matchesFilter("todo", 1, true), false);
+  assert.equal(PC.matchesFilter("todo", 2, false), false);
+});
+
+test("done is products with a photo live on the storefront", () => {
+  assert.equal(PC.matchesFilter("done", 1, true), true);
+  assert.equal(PC.matchesFilter("done", 3, true), true);
+  assert.equal(PC.matchesFilter("done", 0, false), false);
+  // Photos uploaded but none published: not done.
+  assert.equal(PC.matchesFilter("done", 2, false), false);
+});
+
+test("review is where the owner still has a choice to make", () => {
+  // More than one photo, one of them live -> a choice remains.
+  assert.equal(PC.matchesFilter("review", 2, true), true);
+  assert.equal(PC.matchesFilter("review", 4, true), true);
+  // Photos exist but none is live -> nothing on the site yet.
+  assert.equal(PC.matchesFilter("review", 1, false), true);
+  assert.equal(PC.matchesFilter("review", 2, false), true);
+  // Settled: exactly one photo and it is live.
+  assert.equal(PC.matchesFilter("review", 1, true), false);
+  // Nothing to review.
+  assert.equal(PC.matchesFilter("review", 0, false), false);
+});
+
+test("a product can be both done and review at once", () => {
+  assert.equal(PC.matchesFilter("done", 3, true), true);
+  assert.equal(PC.matchesFilter("review", 3, true), true);
+});
+
+test("an unknown mode falls back to all, never to an empty list", () => {
+  assert.equal(PC.matchesFilter("nonsense", 0, false), true);
+  assert.equal(PC.matchesFilter(undefined, 1, true), true);
+  assert.equal(PC.matchesFilter("", 0, false), true);
+});
+
+test("missing counts are treated as zero", () => {
+  assert.equal(PC.matchesFilter("todo", undefined, false), true);
+  assert.equal(PC.matchesFilter("done", undefined, false), false);
+});
