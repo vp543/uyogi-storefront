@@ -124,3 +124,11 @@
 .cand__acts { display: flex; flex-direction: column; gap: 4px; }
 .cand__acts .btn { padding: 6px 8px; font-size: 12px; }
 .cand__acts .btn[disabled] { opacity: .4; cursor: not-allowed; }
+
+/* Capture screen: the four shooting rules share the fixed 1:1 stage with the
+   camera button, so the stage becomes a centred column instead of a drop box. */
+.cap__stage.is-drop { display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 12px; }
+.cap__rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 12.5px; color: var(--ink-800); text-align: left; }
+.cap__rules li { padding-left: 14px; position: relative; line-height: 1.35; }
+.cap__rules li::before { content: "•"; position: absolute; left: 0; color: var(--sun-deep); }
+.cap__stage.is-drop .cap__drop { height: auto; padding: 18px 0; border: 1px dashed var(--line-strong); border-radius: var(--radius-sm); }

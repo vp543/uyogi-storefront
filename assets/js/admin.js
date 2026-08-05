@@ -266,11 +266,11 @@ async function decide(id, status) {
 function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 
 function rowHTML(p) {
-  const has = state.haspic.has(p.id);
+  const n = state.candCount.get(p.id) || 0;
   return `<button class="admin__row" data-pick="${esc(p.id)}">
     <span class="admin__ic">${window.categoryIcon(p.category)}</span>
     <span class="admin__meta"><b>${esc(p.name)}</b><small>${esc(p.code || "—")} · ${esc(p.category)}</small></span>
-    <span class="admin__badge ${has ? "is-has" : "is-need"}">${has ? "Has photo" : "Needs photo"}</span>
+    <span class="admin__badge ${n ? "is-has" : "is-need"}">${esc(PhotoCandidates.photoCountLabel(n))}</span>
   </button>`;
 }
 
@@ -348,7 +348,7 @@ function openCapture(sku) {
   async function renderCandidates() {
     processed = null;
     killEditor();
-    stage.classList.remove("is-editing");
+    stage.classList.remove("is-editing", "is-drop");
     setNote("");
     setStatus("Loading photos…");
     try {
@@ -496,11 +496,21 @@ function openCapture(sku) {
   function renderDrop() {
     processed = null;
     stage.classList.remove("is-editing", "is-strip");
+    stage.classList.add("is-drop");
     setStatus("");
     // Two separate inputs on purpose. `capture` sends Android straight to the
     // camera app with no gallery option, and that hand-off is what makes the
     // phone discard the page — so offer a gallery route that skips it.
+    // The rules sit above the button because this is the screen staff read
+    // right before shooting — the failures they cause (photographing the box,
+    // reusing a manufacturer image) can't be fixed by any amount of code.
     stage.innerHTML = `
+      <ul class="cap__rules">
+        <li><b>Photograph the product itself — not the box.</b></li>
+        <li>Plain table or wall behind it, good light.</li>
+        <li>Fill the frame with the product.</li>
+        <li>Never use a picture from the internet or WhatsApp.</li>
+      </ul>
       <label class="cap__drop" id="cap-drop">
         <input id="cap-file" type="file" accept="image/*" capture="environment" hidden>
         <span>Tap to take a photo</span>
@@ -593,6 +603,7 @@ function openCapture(sku) {
     diag("stage 1 edit");
     processed = null;
     killEditor();
+    stage.classList.remove("is-drop");
     stage.classList.add("is-editing");
     stage.innerHTML = `<div id="ed-host" style="width:100%"></div>`;
     editor = ImgEdit.mountEditor($("ed-host"), raw, {});
@@ -632,6 +643,7 @@ function openCapture(sku) {
   function renderAdjust() {
     diag("stage 2 edit");
     killEditor();
+    stage.classList.remove("is-drop");
     stage.classList.add("is-editing");
     stage.innerHTML = `
       <div id="ed-host" style="width:100%"></div>
